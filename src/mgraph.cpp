@@ -202,13 +202,14 @@ LocateVex(MGraph G, VertexType u)
 
 // 初始条件：图G存在，v是G中某个顶点的序号。操作结果：返回v的值
 VertexType&
-GetVex(MGraph G, int v)
+GetVex(MGraph& G, int v)
 {
     if(v < 0 || v >= G.vexnum)
     {
         printf("错误：顶点序号 %d 超出范围\n", v);
         exit(EXIT_FAILURE);
     }
+
     return G.vexs[v];
 }
 

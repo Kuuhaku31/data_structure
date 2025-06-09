@@ -9,8 +9,8 @@ set(CMAKE_CXX_STANDARD 11)
 include_directories("./include")
 
 set(SOURCES
-    "./ignore/main.cpp"
-    "./src/mgraph.cpp"
+    "./src/algraph.cpp"
+    "./src/main.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
