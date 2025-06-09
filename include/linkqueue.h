@@ -3,6 +3,20 @@
 
 #pragma once
 
+#include <stdio.h>
+#include <stdlib.h>
+
+
+using namespace std;
+
+// 函数结果状态代码
+#define TRUE 1
+#define FALSE 0
+#define OK 1
+#define ERROR 0
+#define OVERFLOW -1
+
+typedef int      QElemType;
 typedef BiTNode* QElemType;
 
 typedef struct QNode
