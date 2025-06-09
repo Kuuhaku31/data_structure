@@ -1,16 +1,27 @@
 
 // main.cpp
 
-#include "bitree.h"
+#include "graph.h"
+
 
 int
 main()
 {
-    BiTree T;
-    CreateBiTree(T);
-    printf("该树的高度为：%d\n", BiTreeDepth(T));
-    printf("节点的数目为: %d\n", NodeCount(T));
-    printf("叶子节点的数目为: %d\n", LeafNodeCount(T));
-    DestroyBiTree(T);
+    MGraph     g;
+    VertexType v1, v2;
+    CreateGraphF(g); // 利用数据文件创建邻接矩阵表示的图
+    Display(g);      // 输出图
+    int i, j, k, n;
+    printf("请输入顶点的值: ");
+    scanf("%s", v1);
+    printf("输出图G中顶点%s的所有邻接顶点: ", v1);
+    k = FirstAdjVex(g, v1);
+    while(k != -1)
+    {
+        strcpy(v2, g.vertices[k]);
+        visit(v2);
+        k = NextAdjVex(g, v1, v2);
+    }
+    printf("\n");
     return 0;
 }
