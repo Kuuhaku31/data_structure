@@ -11,13 +11,13 @@ int m = 0; // 全局变量, H(key) = key % m
 // 操作结果：构造一个空的哈希表
 void
 InitHashTable(HashTable& H)
-{
-    // 输入哈希表存储容量
-    scanf("%d", &H.sizeindex);
-
-    H.count = 0;
-    H.elem  = (ElemType*)malloc(H.sizeindex * sizeof(ElemType));
-    for(int i = 0; i < H.sizeindex; i++) H.elem[i].key = NULL_KEY; // 未填记录的标志
+{                              // 操作结果：构造一个空的哈希表
+    int i;
+    H.count = 0;               // 当前元素个数为0
+    scanf("%d", &H.sizeindex); // 哈希表存储容量
+    H.elem = (ElemType*)malloc(H.sizeindex * sizeof(ElemType));
+    for(i = 0; i < H.sizeindex; i++)
+        H.elem[i].key = NULL_KEY; // 未填记录的标志
 }
 
 
@@ -44,7 +44,7 @@ Hash(KeyType K)
 void
 collision(int& p, int d)
 {
-    p = (p + d) % m;
+    p = (p + 1) % m;
 }
 
 
@@ -54,15 +54,20 @@ collision(int& p, int d)
 int
 SearchHash(HashTable H, KeyType K, int& index, int& count)
 {
-    index = Hash(K);
-    count = 0;
-    while(H.elem[index].key != NULL_KEY)
+    int start = Hash(K);
+    index     = start;
+    count     = 1;
+    while(count <= H.sizeindex)
     {
-        if(H.elem[index].key == K) return SUCCESS;
-        index = (index + 1) % m; // 线性探测再散列
-        count++;                 // 冲突次数加1
+        if(H.elem[index].key == K) return SUCCESS;               // 查找成功
+        else if(H.elem[index].key == NULL_KEY) return UNSUCCESS; // 查找失败，未找到
+        else
+        {
+            collision(index, count); // 线性探测再散列
+            count++;
+        }
     }
-    return UNSUCCESS;
+    return UNSUCCESS; // 冲突次数过大，返回UNSUCCESS
 }
 
 
@@ -71,25 +76,19 @@ SearchHash(HashTable H, KeyType K, int& index, int& count)
 int
 InsertHash(HashTable& H, ElemType e)
 {
-    int index; // 哈希地址
-    int count; // 冲突次数
-
-    // 在哈希表H中查找关键码为e.key的元素
-    if(SearchHash(H, e.key, index, count) == SUCCESS)
+    int index, count;
+    int res = SearchHash(H, e.key, index, count);
+    if(res == SUCCESS) // 查找成功，元素已存在
     {
-        return DUPLICATE; // 重复
+        return SUCCESS;
     }
-
-    // 冲突次数过大
-    if(count >= H.sizeindex)
+    else if(res == UNSUCCESS) // 查找不成功，插入位置
     {
-        return UNSUCCESS;
+        H.elem[index] = e;    // 插入数据元素
+        H.count++;
+        return SUCCESS;
     }
-
-    // 插入数据元素e到哈希表H中
-    H.elem[index] = e; // 插入数据元素e到哈希表H中
-    H.count++;
-    return SUCCESS;
+    return UNSUCCESS;
 }
 
 
@@ -112,6 +111,33 @@ TraverseHash(HashTable H, void (*Vi)(int))
     printf("\n");
 }
 
+int
+Find(HashTable H, KeyType K, int& index)
+{
+    int count = 1;
+    int start = Hash(K);
+    index     = start;
+    while(count <= H.sizeindex)
+    {
+        if(H.elem[index].key == K)
+        {
+            printf("哈希地址为%d，第%d次查找成功\n", index, count);
+            return SUCCESS;
+        }
+        else if(H.elem[index].key == NULL_KEY)
+        {
+            printf("哈希地址为%d，第%d次查找为空\n", index, count);
+            return UNSUCCESS;
+        }
+        else
+        {
+            printf("哈希地址为%d，第%d次冲突\n", index, count);
+            collision(index, count);
+            count++;
+        }
+    }
+    return UNSUCCESS;
+}
 
 void
 print(int p)

@@ -40,4 +40,5 @@ void     collision(int& p, int d);                           // 线性探测再�
 int      SearchHash(HashTable H, KeyType K, int& p, int& c); // 在开放定址哈希表H中查找关键码为K的元素
 int      InsertHash(HashTable& H, ElemType e);               // 查找不成功时插入数据元素e到开放定址哈希表H中
 void     TraverseHash(HashTable H, void (*Vi)(int));         // 按哈希地址的顺序遍历哈希表
-void     print(int p);
+void     print(int p);                                       // 打印哈希地址或关键码
+int      Find(HashTable H, KeyType K, int& p);               // 查找关键码为K的元素，并返回其哈希地址
