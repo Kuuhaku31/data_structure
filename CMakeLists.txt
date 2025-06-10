@@ -14,3 +14,7 @@ set(SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+# dev
+project(dev)
+add_executable(${PROJECT_NAME} "./ignore/main.cpp")
