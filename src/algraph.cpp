@@ -3,6 +3,8 @@
 
 #include "algraph.h"
 
+#include "sqqueue.h"
+
 
 int
 equal(ElemType a, ElemType b)
@@ -369,4 +371,75 @@ NextAdjVex(ALGraph G, VertexType v, VertexType w)
         p = p->nextarc; // 继续查找
     }
     return -1;          // 没有找到邻接顶点w
+}
+
+
+int visited[MAX_VERTEX_NUM]; // 访问标志数组(全局量)
+
+// 从第v个顶点出发递归地深度优先遍历图G
+void
+DFS(ALGraph G, int v)
+{
+    visited[v] = 1;                      // 标记顶点v为已访问
+    visit(G.vertices[v].data);           // 访问顶点v
+
+    LinkList p = G.vertices[v].firstarc; // 获取顶点v的邻接表
+    while(p)
+    {
+        // 如果邻接顶点未访问，则递归访问
+        if(!visited[p->data.adjvex]) DFS(G, p->data.adjvex);
+
+        // 访问完邻接顶点后，继续遍历下一个邻接弧
+        p = p->nextarc;
+    }
+}
+// 对图G作深度优先遍历
+void
+DFSTraverse(ALGraph G)
+{
+    for(int i = 0; i < G.vexnum; i++) visited[i] = 0; // 初始化访问标志数组
+    for(int i = 0; i < G.vexnum; i++)
+    {
+        if(!visited[i]) DFS(G, i);
+    }
+}
+
+
+// 按广度优先非递归遍历图G。使用辅助队列Q和访问标志数组visited
+void
+BFSTraverse(ALGraph G)
+{
+    SqQueue Q;    // 辅助队列
+    InitQueue(Q); // 初始化队列
+
+    // 初始化访问标志数组
+    for(int i = 0; i < G.vexnum; i++) visited[i] = 0;
+    for(int i = 0; i < G.vexnum; i++)
+    {
+        // 如果顶点i未被访问
+        if(!visited[i])
+        {
+            visited[i] = 1;            // 标记为已访问
+            visit(G.vertices[i].data); // 访问顶点i
+            EnQueue(Q, i);             // 将顶点i入队
+
+            while(!QueueEmpty(Q))      // 当队列不为空时
+            {
+                int v;
+                DeQueue(Q, v);                                  // 出队一个顶点v
+                LinkList p = G.vertices[v].firstarc;            // 获取顶点v的邻接表
+
+                while(p)                                        // 遍历顶点v的所有邻接弧
+                {
+                    if(!visited[p->data.adjvex])                // 如果邻接顶点未被访问
+                    {
+                        visited[p->data.adjvex] = 1;            // 标记为已访问
+                        visit(G.vertices[p->data.adjvex].data); // 访问邻接顶点
+                        EnQueue(Q, p->data.adjvex);             // 将邻接顶点入队
+                    }
+                    p = p->nextarc;                             // 移动到下一个邻接弧
+                }
+            }
+        }
+    }
 }

@@ -93,3 +93,9 @@ void Display(ALGraph G);                                // 输出图的邻接表
 int  LocateVex(ALGraph G, VertexType u);                // 若G中存在顶点u，则返回该顶点在图中位置；否则返回-1
 int  FirstAdjVex(ALGraph G, VertexType v);              // 返回v的第一个邻接顶点的序号；否则返回-1
 int  NextAdjVex(ALGraph G, VertexType v, VertexType w); // v是图G中某个顶点，w是v的邻接顶点，返回v的(相对于w的)下一个邻接顶点的序号
+
+
+/* 遍历算法 */
+
+void DFSTraverse(ALGraph G); // 对图G作深度优先遍历
+void BFSTraverse(ALGraph G); // 按广度优先非递归遍历图G
