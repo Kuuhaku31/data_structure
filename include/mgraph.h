@@ -57,9 +57,7 @@ VertexType& GetVex(MGraph G, int v);                          // v是G中某个�
 int         FirstAdjVex(MGraph G, VertexType v);              // v是图G中某个顶点，返回v的第一个邻接顶点的序号。若顶点在G中没有邻接顶点，则返回 -1
 int         NextAdjVex(MGraph G, VertexType v, VertexType w); // v是G中某个顶点，w是v的邻接顶点，返回v的(相对于w的)下一个邻接顶点的序号，若w是v的最后一个邻接顶点，则返回 -1
 void        DestroyGraph(MGraph& G);                          // 销毁图G
-
-
-/* 遍历算法 */
-
-void DFSTraverse(MGraph G); // 从第1个顶点起，按深度优先遍历图G
-void BFSTraverse(MGraph G); // 从第1个顶点起，按广度优先遍历图G
+void        DFSTraverse(MGraph G);                            // 从第1个顶点起，按深度优先遍历图G
+void        BFSTraverse(MGraph G);                            // 从第1个顶点起，按广度优先遍历图G
+int         TopologicalSort(MGraph G);                        // 有向图G采用邻接矩阵存储结构。若G无回路，则输出G的顶点的一个拓扑序列并返回1，否则返回0
+void        FindInDegree(MGraph G, int in_degree[]);          // 求顶点的入度

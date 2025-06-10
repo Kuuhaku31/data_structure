@@ -4,6 +4,7 @@
 #include "algraph.h"
 
 #include "sqqueue.h"
+#include "sqstack.h"
 
 
 int
@@ -442,4 +443,75 @@ BFSTraverse(ALGraph G)
             }
         }
     }
+}
+
+
+// 计算图G每个顶点的入度，并且保存在in_degree数组
+void
+FindInDegree(ALGraph G, int in_degree[])
+{
+    for(int i = 0; i < G.vexnum; i++) in_degree[i] = 0; // 赋初值为 0
+    for(int i = 0; i < G.vexnum; i++)
+    {
+        ArcNode* p = G.vertices[i].firstarc;
+        while(p)
+        {
+            in_degree[p->data.adjvex]++;
+            p = p->nextarc;
+        }
+    }
+}
+
+
+// 有向图G采用邻接表存储结构。
+// 若G无回路，则输出G的顶点的一个拓扑序列并返回1，否则返回0。
+int
+TopologicalSort(ALGraph algraph)
+{
+    int v_index;                      // 弹出的顶点
+    int v_count = 0;                  // count记录已输出的顶点数
+    int in_degree[MAX_VERTEX_NUM];    // 入度数组
+    int top[MAX_VERTEX_NUM];          // 存放拓扑序列的栈
+
+    SqStack sqstack;                  // 辅助栈
+    InitStack(sqstack);               // 初始化栈
+
+    FindInDegree(algraph, in_degree); // 求入度
+
+    // 将所有入度为0的顶点入栈
+    for(int i = 0; i < algraph.vexnum; i++)
+    {
+        if(in_degree[i] == 0) Push(sqstack, i);
+    }
+
+    // 记录拓扑序列的顶点
+    while(!StackEmpty(sqstack))
+    {
+        Pop(sqstack, v_index);    // 弹出一个顶点k
+        top[v_count++] = v_index; // 存入拓扑序列
+
+        // 遍历k的邻接顶点，减少它们的入度
+        for(LinkList p = algraph.vertices[v_index].firstarc; p; p = p->nextarc)
+        {
+            in_degree[p->data.adjvex]--;                                      // 入度减1
+            if(in_degree[p->data.adjvex] == 0) Push(sqstack, p->data.adjvex); // 如果邻接顶点的入度变为 0 ，将其入栈
+        }
+    }
+
+    for(int i = 0; i < v_count; i++) printf("%s ", algraph.vertices[top[i]].data); // 输出拓扑序列
+    if(v_count < algraph.vexnum)                                                   // 如果输出的顶点数小于总顶点数，说明有回路
+    {
+        printf("\n此有向图有回路");
+        return 0;
+    }
+
+    return 1;
+}
+
+
+// 获取图G中顶点v的信息
+VertexType&
+GetVex(ALGraph G, int v)
+{
+    return G.vertices[v].data;
 }

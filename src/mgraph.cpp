@@ -4,6 +4,7 @@
 #include "mgraph.h"
 
 #include "sqqueue.h"
+#include "sqstack.h"
 
 
 // 访问顶点 i 的操作
@@ -200,6 +201,14 @@ LocateVex(MGraph G, VertexType u)
 }
 
 
+// v是G中某个顶点的序号，返回v的值
+VertexType&
+GetVex(MGraph G, int v)
+{
+    return G.vexs[v];
+}
+
+
 // 初始条件：图G存在，v是G中某个顶点的序号。操作结果：返回v的值
 VertexType&
 GetVex(MGraph& G, int v)
@@ -372,4 +381,71 @@ BFSTraverse(MGraph G)
             }
         }
     }
+}
+
+
+// 计算图G每个顶点的入度，并且保存在in_degree数组
+void
+FindInDegree(MGraph G, int in_degree[])
+{
+    int i, j;
+    for(i = 0; i < G.vexnum; i++) in_degree[i] = 0; // 赋初值为0
+    for(i = 0; i < G.vexnum; i++)
+    {
+        for(j = 0; j < G.vexnum; j++)
+        {
+            if(G.arcs[j][i].adj == 1) in_degree[i]++;
+        }
+    }
+}
+
+
+// 有向图G采用邻接矩阵存储结构。
+// 若G无回路，则输出G的顶点的一个拓扑序列并返回1，否则返回0。
+int
+TopologicalSort(MGraph G)
+{
+    int i, j, k, count = 0;        // count记录已输出的顶点数
+    int in_degree[MAX_VERTEX_NUM]; // 入度数组
+    int top[MAX_VERTEX_NUM];       // 存放拓扑序列的栈
+
+    SqStack S;                     // 辅助栈
+
+    FindInDegree(G, in_degree);    // 求入度
+
+    InitStack(S);                  // 初始化栈
+
+    // 将所有入度为0的顶点入栈
+    for(i = 0; i < G.vexnum; i++)
+    {
+        if(in_degree[i] == 0) Push(S, i);
+    }
+
+    while(!StackEmpty(S))
+    {
+        Pop(S, k);        // 弹出一个顶点k
+        top[count++] = k; // 存入拓扑序列
+
+        // 遍历k的邻接顶点，减少它们的入度
+        for(j = 0; j < G.vexnum; j++)
+        {
+            // 如果k指向j
+            if(G.arcs[k][j].adj != 0 && G.arcs[j][k].adj != INFINITY)
+            {
+                in_degree[j]--;                   // 入度减1
+                if(in_degree[j] == 0) Push(S, j); // 如果j的入度变为 0 ，将j入栈
+            }
+        }
+    }
+
+    if(count < G.vexnum)                                          // 如果输出的顶点数小于总顶点数，说明有回路
+    {
+        for(i = 0; i < count; i++) printf("%s ", G.vexs[top[i]]); // 输出拓扑序列
+        printf("\n此有向图有回路");
+        return 0;
+    }
+
+    for(i = 0; i < count; i++) printf("%s ", G.vexs[top[i]]); // 输出拓扑序列
+
+    return 1;
 }
