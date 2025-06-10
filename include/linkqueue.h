@@ -16,8 +16,8 @@ using namespace std;
 #define ERROR 0
 #define OVERFLOW -1
 
-typedef int      QElemType;
-typedef BiTNode* QElemType;
+typedef int QElemType;
+// typedef BiTNode* QElemType;
 
 typedef struct QNode
 {

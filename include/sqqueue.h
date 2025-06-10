@@ -3,6 +3,17 @@
 
 #pragma once
 
+
+// 函数结果状态代码
+#define TRUE 1
+#define FALSE 0
+#define OK 1
+#define ERROR 0
+#define OVERFLOW -1
+typedef int QElemType;
+
+#define MAX_QSIZE 5    // 最大队列长度+1
+
 typedef int QElemType; // 队列元素类型
 
 struct SqQueue
