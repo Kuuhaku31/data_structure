@@ -1,23 +1,22 @@
 
 // puzzle/main.cpp
 
-#include <algorithm>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 
 typedef std::string StateArray; // 定义一个状态数组为字符串类型，方便处理
 
 // 循环链式队列节点
+// 队列类型定义为指向 LinkQueueNode 的指针
 typedef struct LinkQueueNode
 {
     StateArray     state;     // 队列中的状态数组
     LinkQueueNode* last_node; // 指向上一个节点
     LinkQueueNode* next_node; // 指向下一个节点
-} LinkQueueNode;
 
-typedef LinkQueueNode* LinkQueue; // 队列类型定义为指向 LinkQueueNode 的指针
+} LinkQueueNode, *LinkQueue;
+
 
 void LinkQueueInit(LinkQueue& q);
 void LinkQueueDelete(LinkQueue& q);
@@ -130,16 +129,17 @@ printState(const StateArray& state)
 }
 
 
-struct StateNode
+typedef struct StateNode
 {
     int        min_steps;  // 最小步数
     StateArray last_state; // 上一个状态
-};
+
+} StateNode;
 
 
 // BFS + 路径恢复
 int
-bfs(const StateArray& start, std::vector<StateArray>& path)
+bfs(const StateArray& start, LinkQueue& path)
 {
     printf("开始 BFS 搜索...\n");
     std::unordered_map<StateArray, StateNode> state_info; // 记录每个状态的信息
@@ -157,16 +157,18 @@ bfs(const StateArray& start, std::vector<StateArray>& path)
         // 如果当前状态是目标状态
         if(cur == TARGET)
         {
+            printf("找到目标状态！\n");
+
             // 从目标状态向前回溯路径
             StateArray s = TARGET;
             while(s != start)
             {
-                path.push_back(s);
+                LinkQueueEnqueue(path, s);    // 将当前状态加入路径
                 s = state_info[s].last_state; // 复制上一个状态
             }
-            path.push_back(start);
-            reverse(path.begin(), path.end()); // 反转路径，使其从起始状态到目标状态
-            return state_info[cur].min_steps;
+            LinkQueueEnqueue(path, start);
+
+            return state_info[cur].min_steps; // 返回最小步数
         }
 
         // 获取当前状态中 '0' 的位置
@@ -215,7 +217,8 @@ main()
         start += ch;
     }
 
-    std::vector<StateArray> path;
+    LinkQueue path;
+    LinkQueueInit(path); // 初始化路径队列
 
     int steps = bfs(start, path);
 
@@ -225,13 +228,27 @@ main()
     }
     else
     {
+        printf("路径为:\n");
         printf("最少步数为: %d\n", steps);
-        printf("路径如下（共 %d 步）:\n\n", path.size());
-        for(int i = 0; i < path.size(); ++i)
+
+        if(LinkQueueIsEmpty(path))
         {
-            printf("Step %d:\n", i);
-            printState(path[i]);
+            printf("路径为空。\n");
+            return 0;
         }
+
+        // 从循环队尾开始打印路径
+        int            count   = 0;
+        LinkQueueNode* current = path;
+        do
+        {
+            current = current->last_node; // 向前移动到上一个节点
+
+            printf("移动%d次：\n", count);
+            printState(current->state);
+
+            count++;
+        } while(current != path); // 循环队列
     }
 
     return 0;
