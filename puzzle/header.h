@@ -23,11 +23,20 @@ typedef struct LinkListNode
 
 typedef struct StateNode
 {
-    int        min_steps;  // 最小步数
-    StateArray last_state; // 上一个状态
+    int        min_steps;   // 最小步数
+    StateArray last_state;  // 上一个状态
+    char       change_code; // 记录状态变化的代码（移动方向）
 
 } StateNode;
 
+// 定义移动方向
+enum MoveDirection
+{
+    UP    = 0,
+    RIGHT = 1,
+    DOWN  = 2,
+    LEFT  = 3,
+};
 
 void LinkListInit(LinkQueue& list);                              // 初始化队列
 void LinkListDelete(LinkQueue& list);                            // 删除队列

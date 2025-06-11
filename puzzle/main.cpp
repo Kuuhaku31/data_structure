@@ -99,19 +99,9 @@ LinkListIsEmpty(const LinkQueue& q)
 }
 
 
-const StateArray TARGET = "123456780";
-
-// 定义移动方向
-const int move_vector[4][2] = {
-    { +0, -1 }, // 上
-    { +1, +0 }, // 右
-    { +0, +1 }, // 下
-    { -1, +0 }  // 左
-};
-
 // BFS + 路径恢复
 int
-bfs(const StateArray& start, LinkQueue& path)
+bfs(const StateArray& start, const StateArray target, LinkQueue& path)
 {
     printf("开始 BFS 搜索...\n");
     std::unordered_map<StateArray, StateNode> state_info; // 记录每个状态的信息
@@ -127,12 +117,12 @@ bfs(const StateArray& start, LinkQueue& path)
         LinkListPopHead(q, cur); // 当前状态出队
 
         // 如果当前状态是目标状态
-        if(cur == TARGET)
+        if(cur == target)
         {
             printf("找到目标状态！\n");
 
             // 从目标状态向前回溯路径
-            StateArray s = TARGET;
+            StateArray s = target;
             while(s != start)
             {
                 LinkListPushTail(path, s);    // 将当前状态加入路径
@@ -151,8 +141,28 @@ bfs(const StateArray& start, LinkQueue& path)
         // 尝试四个方向移动 '0'
         for(int i = 0; i < 4; ++i)
         {
-            int nx = x + move_vector[i][0];
-            int ny = y + move_vector[i][1];
+            int nx = 0;
+            int ny = 0;
+
+            switch(i)
+            {
+            case UP:
+                nx = x;
+                ny = y - 1; // 向上移动
+                break;
+            case RIGHT:
+                nx = x + 1; // 向右移动
+                ny = y;
+                break;
+            case DOWN:
+                nx = x;
+                ny = y + 1; // 向下移动
+                break;
+            case LEFT:
+                nx = x - 1; // 向左移动
+                ny = y;
+                break;
+            }
 
             // 检查新位置是否在 3x3 网格内
             if(nx >= 0 && nx < 3 && ny >= 0 && ny < 3)
@@ -167,8 +177,9 @@ bfs(const StateArray& start, LinkQueue& path)
                 // 如果新状态未被访问过
                 if(!state_info.count(next))
                 {
-                    state_info[next] = { state_info[cur].min_steps + 1, cur }; // 更新新状态的信息
-                    LinkListPushTail(q, next);                                 // 将新状态入队
+                    StateNode new_state = { state_info[cur].min_steps + 1, cur };
+                    state_info[next]    = new_state; // 更新新状态的信息
+                    LinkListPushTail(q, next);       // 将新状态入队
                 }
             }
         }
@@ -190,9 +201,11 @@ main()
     }
 
     LinkQueue path;
-    LinkListInit(path); // 初始化路径队列
+    LinkListInit(path);              // 初始化路径队列
 
-    int steps = bfs(start, path);
+    StateArray target = "123456780"; // 目标状态
+    printf("目标状态为: %s\n", target.c_str());
+    int steps = bfs(start, target, path);
 
     if(steps == -1)
     {
