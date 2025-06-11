@@ -38,59 +38,68 @@ LinkListDelete(LinkQueue& q)
 
 // 入队操作
 void
-LinkListPushTail(LinkQueue& q, const StateArray& state, Operate operate)
+LinkListPushTail(LinkQueue& list, LinkListNode& res_node)
 {
     // 创建新节点并设置状态
-    LinkListNode* new_node  = new LinkListNode;
-    new_node->current_state = state;
-    new_node->next_node     = nullptr;
-    new_node->last_node     = nullptr;
-    new_node->operate       = operate;
+    LinkListNode* new_node = new LinkListNode;
+
+    new_node->deep          = res_node.deep;
+    new_node->current_state = res_node.current_state;
+    new_node->last_state    = res_node.last_state;
+    new_node->operate       = res_node.operate;
+
+    new_node->next_node = nullptr; // 固定初始化为 nullptr
+    new_node->last_node = nullptr;
+
 
     // 如果队列为空，初始化新节点为队头和队尾
-    if(q == nullptr)
+    if(list == nullptr)
     {
         new_node->next_node = new_node;
         new_node->last_node = new_node;
-        q                   = new_node;
+        list                = new_node;
     }
     // 如果队列不为空，将新节点添加到队尾
     else
     {
-        LinkListNode* tail  = q->last_node;
+        LinkListNode* tail  = list->last_node;
         tail->next_node     = new_node;
         new_node->last_node = tail;
-        new_node->next_node = q;
-        q->last_node        = new_node;
+        new_node->next_node = list;
+        list->last_node     = new_node;
     }
 }
 
 // 出队操作
 void
-LinkListPopHead(LinkQueue& q, StateArray& front_array, Operate& operate)
+LinkListPopHead(LinkQueue& list, LinkListNode& dst_node)
 {
-    if(q == nullptr) return;
+    if(list == nullptr) return;
 
-    LinkListNode* front_node = q;
-    front_array              = front_node->current_state;
-    operate                  = front_node->operate;
+    LinkListNode* front_node = list;
+    dst_node.deep            = front_node->deep;
+    dst_node.current_state   = front_node->current_state;
+    dst_node.last_state      = front_node->last_state;
+    dst_node.operate         = front_node->operate;
+    dst_node.next_node       = front_node->next_node;
+    dst_node.last_node       = front_node->last_node;
 
     // 只有一个节点
-    if(q->next_node == q)
+    if(list->next_node == list)
     {
-
         delete front_node;
-        q = nullptr;
+        list = nullptr;
     }
     // 有多个节点
     else
     {
-        LinkListNode* tail = q->last_node;
-        LinkListNode* next = q->next_node;
+        LinkListNode* tail = list->last_node;
+        LinkListNode* next = list->next_node;
         tail->next_node    = next;
         next->last_node    = tail;
+
         delete front_node;
-        q = next;
+        list = next;
     }
 }
 
@@ -126,34 +135,40 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
     LinkQueue                                    queue;      // 队列用于 BFS
     LinkListInit(queue);                                     // 初始化队列
 
-    state_info[start] = { 0, "" };                           // 初始状态信息
-    LinkListPushTail(queue, start, Operate::NONE);           // 将初始状态入队
+
+    LinkListNode start_node;
+    start_node.deep          = 0;             // 初始状态步数为 0
+    start_node.current_state = start;         // 设置初始状态
+    start_node.operate       = Operate::NONE; // 初始状态没有操作
+    LinkListPushTail(queue, start_node);      // 将初始状态入队
+
+    state_info[start] = start_node;           // 记录初始状态的信息
 
     while(!LinkListIsEmpty(queue))
     {
-        StateArray cur;
-        Operate    operate;
-        LinkListPopHead(queue, cur, operate); // 当前状态出队
+        LinkListNode cur_node;
+        LinkListPopHead(queue, cur_node); // 当前状态出队
 
         // 如果当前状态是目标状态
-        if(cur == target)
+        if(cur_node.current_state == target)
         {
             printf("找到目标状态！\n");
 
             // 从目标状态向前回溯路径
-            StateArray s = cur;
+            StateArray s = cur_node.current_state;
             while(s != start)
             {
-                LinkListPushTail(path, s, state_info[s].operate); // 将当前状态加入路径
-                s = state_info[s].last_state;                     // 复制上一个状态
+                LinkListNode state_info_node = state_info[s]; // 获取当前状态的信息
+                LinkListPushTail(path, state_info_node);      // 将当前状态加入路径
+                s = state_info[s].last_state;                 // 复制上一个状态
             }
-            LinkListPushTail(path, start, Operate::NONE);         // 将初始状态加入路径
+            LinkListPushTail(path, start_node);               // 将初始状态加入路径
 
-            return state_info[cur].deep;                          // 返回最小步数
+            return cur_node.deep;                             // 返回最小步数
         }
 
         // 获取当前状态中 '0' 的位置
-        int z = cur.find('0');
+        int z = cur_node.current_state.find('0');
         int x = z % 3;
         int y = z / 3;
 
@@ -192,20 +207,20 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
                 int nz = ny * 3 + nx;
 
                 // 生成新状态
-                StateArray next = cur;
+                StateArray next = cur_node.current_state;
                 std::swap(next[z], next[nz]);
 
                 // 如果新状态未被访问过
                 if(!state_info.count(next))
                 {
                     LinkListNode new_state;
-                    new_state.deep          = state_info[cur].deep + 1; // 更新步数
-                    new_state.last_state    = cur;                      // 记录上一个状态
-                    new_state.operate       = dir;                      // 记录操作方向
-                    new_state.current_state = next;                     // 更新新状态
+                    new_state.deep          = state_info[cur_node.current_state].deep + 1; // 更新步数
+                    new_state.last_state    = cur_node.current_state;                      // 记录上一个状态
+                    new_state.operate       = dir;                                         // 记录操作方向
+                    new_state.current_state = next;                                        // 更新新状态
 
-                    state_info[next] = new_state;                       // 更新新状态的信息
-                    LinkListPushTail(queue, next, dir);                 // 将新状态入队
+                    state_info[next] = new_state;                                          // 更新新状态的信息
+                    LinkListPushTail(queue, new_state);                                    // 将新状态入队
                 }
             }
         }
