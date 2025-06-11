@@ -2,18 +2,17 @@
 // puzzle/main.cpp
 
 #include <algorithm>
-// #include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-using namespace std;
 
+typedef std::string StateArray; // 定义一个状态数组为字符串类型，方便处理
 
 // 循环链式队列节点
 typedef struct LinkQueueNode
 {
-    string         state;     // 队列中的状态数组
+    StateArray     state;     // 队列中的状态数组
     LinkQueueNode* last_node; // 指向上一个节点
     LinkQueueNode* next_node; // 指向下一个节点
 } LinkQueueNode;
@@ -22,8 +21,8 @@ typedef LinkQueueNode* LinkQueue; // 队列类型定义为指向 LinkQueueNode �
 
 void LinkQueueInit(LinkQueue& q);
 void LinkQueueDelete(LinkQueue& q);
-void LinkQueueEnqueue(LinkQueue& q, const string& state);
-void LinkQueueDequeue(LinkQueue& q, string& front_array);
+void LinkQueueEnqueue(LinkQueue& q, const StateArray& state);
+void LinkQueueDequeue(LinkQueue& q, StateArray& front_array);
 bool LinkQueueIsEmpty(const LinkQueue& q);
 
 // 初始化队列
@@ -49,7 +48,7 @@ LinkQueueDelete(LinkQueue& q)
 
 // 入队操作
 void
-LinkQueueEnqueue(LinkQueue& q, const string& state)
+LinkQueueEnqueue(LinkQueue& q, const StateArray& state)
 {
     // 创建新节点并设置状态
     LinkQueueNode* new_node = new LinkQueueNode;
@@ -76,7 +75,7 @@ LinkQueueEnqueue(LinkQueue& q, const string& state)
 
 // 出队操作
 void
-LinkQueueDequeue(LinkQueue& q, string& front_array)
+LinkQueueDequeue(LinkQueue& q, StateArray& front_array)
 {
     if(q == nullptr) return;
 
@@ -108,7 +107,7 @@ LinkQueueIsEmpty(const LinkQueue& q)
 }
 
 
-const string TARGET = "123456780";
+const StateArray TARGET = "123456780";
 
 // 定义移动方向
 const int move_vector[4][2] = {
@@ -120,7 +119,7 @@ const int move_vector[4][2] = {
 
 // 打印 3x3 状态
 void
-printState(const string& state)
+printState(const StateArray& state)
 {
     for(int i = 0; i < 9; ++i)
     {
@@ -133,33 +132,33 @@ printState(const string& state)
 
 struct StateNode
 {
-    int    min_steps;  // 最小步数
-    string last_state; // 上一个状态
+    int        min_steps;  // 最小步数
+    StateArray last_state; // 上一个状态
 };
 
 
 // BFS + 路径恢复
 int
-bfs(const string& start, vector<string>& path)
+bfs(const StateArray& start, std::vector<StateArray>& path)
 {
     printf("开始 BFS 搜索...\n");
-    unordered_map<string, StateNode> state_info; // 记录每个状态的信息
-    LinkQueue                        q;          // 队列用于 BFS
-    LinkQueueInit(q);                            // 初始化队列
+    std::unordered_map<StateArray, StateNode> state_info; // 记录每个状态的信息
+    LinkQueue                                 q;          // 队列用于 BFS
+    LinkQueueInit(q);                                     // 初始化队列
 
-    state_info[start] = { 0, "" };               // 初始状态信息
-    LinkQueueEnqueue(q, start);                  // 将初始状态入队
+    state_info[start] = { 0, "" };                        // 初始状态信息
+    LinkQueueEnqueue(q, start);                           // 将初始状态入队
 
     while(!LinkQueueIsEmpty(q))
     {
-        string cur;
+        StateArray cur;
         LinkQueueDequeue(q, cur); // 当前状态出队
 
         // 如果当前状态是目标状态
         if(cur == TARGET)
         {
             // 从目标状态向前回溯路径
-            string s = TARGET;
+            StateArray s = TARGET;
             while(s != start)
             {
                 path.push_back(s);
@@ -188,8 +187,8 @@ bfs(const string& start, vector<string>& path)
                 int nz = ny * 3 + nx;
 
                 // 生成新状态
-                string next = cur;
-                swap(next[z], next[nz]);
+                StateArray next = cur;
+                std::swap(next[z], next[nz]);
 
                 // 如果新状态未被访问过
                 if(!state_info.count(next))
@@ -207,7 +206,7 @@ bfs(const string& start, vector<string>& path)
 int
 main()
 {
-    string start;
+    StateArray start;
     printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
     for(int i = 0; i < 9; ++i)
     {
@@ -216,7 +215,7 @@ main()
         start += ch;
     }
 
-    vector<string> path;
+    std::vector<StateArray> path;
 
     int steps = bfs(start, path);
 
