@@ -18,3 +18,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # dev
 project(dev)
 add_executable(${PROJECT_NAME} "./ignore/main.cpp")
+
+# puzzle
+project(puzzle)
+add_executable(${PROJECT_NAME} "./puzzle/main.cpp")
