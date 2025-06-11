@@ -10,8 +10,14 @@ using namespace std;
 
 
 const string TARGET = "123456780";
-const int    dx[]   = { -1, 1, 0, 0 }; // 上、下、左、右
-const int    dy[]   = { 0, 0, -1, 1 };
+
+// 定义移动方向
+const int move_vector[4][2] = {
+    { +0, -1 }, // 上
+    { +1, +0 }, // 右
+    { +0, +1 }, // 下
+    { -1, +0 }  // 左
+};
 
 // 打印 3x3 状态
 void
@@ -25,16 +31,23 @@ printState(const string& state)
     printf("\n");
 }
 
+
+struct StateNode
+{
+    int    min_steps;  // 最小步数
+    string last_state; // 上一个状态
+};
+
+
 // BFS + 路径恢复
 int
 bfs(const string& start, vector<string>& path)
 {
-    unordered_map<string, int>    dist; // 记录每个状态的距离
-    unordered_map<string, string> prev; // 记录每个状态的前驱状态
-    queue<string>                 q;    // 队列用于 BFS
+    unordered_map<string, StateNode> state_info; // 记录每个状态的信息
+    queue<string>                    q;          // 队列用于 BFS
 
-    dist[start] = 0;                    // 初始状态距离为 0
-    q.push(start);                      // 将初始状态入队
+    state_info[start] = { 0, "" };               // 初始状态信息
+    q.push(start);                               // 将初始状态入队
 
     while(!q.empty())
     {
@@ -49,11 +62,11 @@ bfs(const string& start, vector<string>& path)
             while(s != start)
             {
                 path.push_back(s);
-                s = prev[s];
+                s = state_info[s].last_state; // 复制上一个状态
             }
             path.push_back(start);
             reverse(path.begin(), path.end()); // 反转路径，使其从起始状态到目标状态
-            return dist[cur];
+            return state_info[cur].min_steps;
         }
 
         // 获取当前状态中 '0' 的位置
@@ -64,8 +77,8 @@ bfs(const string& start, vector<string>& path)
         // 尝试四个方向移动 '0'
         for(int i = 0; i < 4; ++i)
         {
-            int nx = x + dx[i];
-            int ny = y + dy[i];
+            int nx = x + move_vector[i][0];
+            int ny = y + move_vector[i][1];
 
             // 检查新位置是否在 3x3 网格内
             if(nx >= 0 && nx < 3 && ny >= 0 && ny < 3)
@@ -78,11 +91,10 @@ bfs(const string& start, vector<string>& path)
                 swap(next[z], next[nz]);
 
                 // 如果新状态未被访问过
-                if(!dist.count(next))
+                if(!state_info.count(next))
                 {
-                    dist[next] = dist[cur] + 1; // 更新新状态的距离
-                    prev[next] = cur;           // 记录前驱状态
-                    q.push(next);               // 将新状态入队
+                    state_info[next] = { state_info[cur].min_steps + 1, cur }; // 更新新状态的信息
+                    q.push(next);                                              // 将新状态入队
                 }
             }
         }
