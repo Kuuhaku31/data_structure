@@ -122,12 +122,12 @@ int
 BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
 {
     printf("开始 BFS 搜索...\n");
-    std::unordered_map<StateArray, StateNode> state_info; // 记录每个状态的信息
-    LinkQueue                                 queue;      // 队列用于 BFS
-    LinkListInit(queue);                                  // 初始化队列
+    std::unordered_map<StateArray, LinkListNode> state_info; // 记录每个状态的信息
+    LinkQueue                                    queue;      // 队列用于 BFS
+    LinkListInit(queue);                                     // 初始化队列
 
-    state_info[start] = { 0, "" };                        // 初始状态信息
-    LinkListPushTail(queue, start, MoveDirection::NONE);  // 将初始状态入队
+    state_info[start] = { 0, "" };                           // 初始状态信息
+    LinkListPushTail(queue, start, MoveDirection::NONE);     // 将初始状态入队
 
     while(!LinkListIsEmpty(queue))
     {
@@ -198,9 +198,14 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
                 // 如果新状态未被访问过
                 if(!state_info.count(next))
                 {
-                    StateNode new_state = { state_info[cur].min_steps + 1, cur, dir };
-                    state_info[next]    = new_state;    // 更新新状态的信息
-                    LinkListPushTail(queue, next, dir); // 将新状态入队
+                    LinkListNode new_state;
+                    new_state.min_steps  = state_info[cur].min_steps + 1; // 更新步数
+                    new_state.last_state = cur;                           // 记录上一个状态
+                    new_state.operate    = dir;                           // 记录操作方向
+                    new_state.state      = next;                          // 更新新状态
+
+                    state_info[next] = new_state;                         // 更新新状态的信息
+                    LinkListPushTail(queue, next, dir);                   // 将新状态入队
                 }
             }
         }

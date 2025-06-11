@@ -24,22 +24,17 @@ enum MoveDirection
 // 队列类型定义为指向 LinkQueueNode 的指针
 typedef struct LinkListNode
 {
-    StateArray    state;     // 队列中的状态数组
-    MoveDirection operate;   // 操作（移动方向）
+    int min_steps;            // 最小步数
 
-    LinkListNode* last_node; // 指向上一个节点
-    LinkListNode* next_node; // 指向下一个节点
-
-} LinkListNode, *LinkQueue;
-
-
-typedef struct StateNode
-{
-    int           min_steps;  // 最小步数
+    StateArray    state;      // 队列中的状态数组
     StateArray    last_state; // 上一个状态
     MoveDirection operate;    // 操作（移动方向）
 
-} StateNode;
+    LinkListNode* last_node;  // 指向上一个节点
+    LinkListNode* next_node;  // 指向下一个节点
+
+} LinkListNode, *LinkQueue;
+
 
 // 定义移动方向
 
