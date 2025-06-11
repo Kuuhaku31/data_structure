@@ -21,4 +21,9 @@ add_executable(${PROJECT_NAME} "./ignore/main.cpp")
 
 # puzzle
 project(puzzle)
-add_executable(${PROJECT_NAME} "./puzzle/main.cpp")
+add_executable(${PROJECT_NAME}
+
+    "./puzzle/main.cpp"
+
+    # "./ignore/puzzle.cpp"
+)

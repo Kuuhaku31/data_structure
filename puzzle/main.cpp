@@ -1,12 +1,111 @@
 
 // puzzle/main.cpp
+
 #include <algorithm>
-#include <queue>
+// #include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 using namespace std;
+
+
+// 循环链式队列节点
+typedef struct LinkQueueNode
+{
+    string         state;     // 队列中的状态数组
+    LinkQueueNode* last_node; // 指向上一个节点
+    LinkQueueNode* next_node; // 指向下一个节点
+} LinkQueueNode;
+
+typedef LinkQueueNode* LinkQueue; // 队列类型定义为指向 LinkQueueNode 的指针
+
+void LinkQueueInit(LinkQueue& q);
+void LinkQueueDelete(LinkQueue& q);
+void LinkQueueEnqueue(LinkQueue& q, const string& state);
+void LinkQueueDequeue(LinkQueue& q, string& front_array);
+bool LinkQueueIsEmpty(const LinkQueue& q);
+
+// 初始化队列
+void
+LinkQueueInit(LinkQueue& q)
+{
+    q = nullptr; // 初始化为空队列
+}
+
+// 删除队列
+void
+LinkQueueDelete(LinkQueue& q)
+{
+    while(q != nullptr)
+    {
+        LinkQueueNode* temp = q;
+
+        q = q->next_node; // 移动到下一个节点
+
+        delete temp;      // 删除当前节点
+    }
+}
+
+// 入队操作
+void
+LinkQueueEnqueue(LinkQueue& q, const string& state)
+{
+    // 创建新节点并设置状态
+    LinkQueueNode* new_node = new LinkQueueNode;
+    new_node->state         = state;
+    new_node->next_node = new_node->last_node = nullptr;
+
+    // 如果队列为空，初始化新节点为队头和队尾
+    if(q == nullptr)
+    {
+        new_node->next_node = new_node;
+        new_node->last_node = new_node;
+        q                   = new_node;
+    }
+    // 如果队列不为空，将新节点添加到队尾
+    else
+    {
+        LinkQueueNode* tail = q->last_node;
+        tail->next_node     = new_node;
+        new_node->last_node = tail;
+        new_node->next_node = q;
+        q->last_node        = new_node;
+    }
+}
+
+// 出队操作
+void
+LinkQueueDequeue(LinkQueue& q, string& front_array)
+{
+    if(q == nullptr) return;
+
+    LinkQueueNode* front_node = q;
+    front_array               = front_node->state;
+
+    if(q->next_node == q)
+    {
+        // 只有一个节点
+        delete front_node;
+        q = nullptr;
+    }
+    else
+    {
+        LinkQueueNode* tail = q->last_node;
+        LinkQueueNode* next = q->next_node;
+        tail->next_node     = next;
+        next->last_node     = tail;
+        delete front_node;
+        q = next;
+    }
+}
+
+// 检查队列是否为空
+bool
+LinkQueueIsEmpty(const LinkQueue& q)
+{
+    return q == nullptr; // 如果队列为空，返回 true
+}
 
 
 const string TARGET = "123456780";
@@ -43,16 +142,18 @@ struct StateNode
 int
 bfs(const string& start, vector<string>& path)
 {
+    printf("开始 BFS 搜索...\n");
     unordered_map<string, StateNode> state_info; // 记录每个状态的信息
-    queue<string>                    q;          // 队列用于 BFS
+    LinkQueue                        q;          // 队列用于 BFS
+    LinkQueueInit(q);                            // 初始化队列
 
     state_info[start] = { 0, "" };               // 初始状态信息
-    q.push(start);                               // 将初始状态入队
+    LinkQueueEnqueue(q, start);                  // 将初始状态入队
 
-    while(!q.empty())
+    while(!LinkQueueIsEmpty(q))
     {
-        string cur = q.front(); // 从队列前端获取当前状态
-        q.pop();                // 当前状态出队
+        string cur;
+        LinkQueueDequeue(q, cur); // 当前状态出队
 
         // 如果当前状态是目标状态
         if(cur == TARGET)
@@ -94,7 +195,7 @@ bfs(const string& start, vector<string>& path)
                 if(!state_info.count(next))
                 {
                     state_info[next] = { state_info[cur].min_steps + 1, cur }; // 更新新状态的信息
-                    q.push(next);                                              // 将新状态入队
+                    LinkQueueEnqueue(q, next);                                 // 将新状态入队
                 }
             }
         }
