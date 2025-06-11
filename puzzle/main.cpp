@@ -13,9 +13,7 @@ printState(const StateArray& state)
         printf("%c ", state[i]);
         if(i % 3 == 2) printf("\n");
     }
-    printf("\n");
 }
-
 
 // 初始化队列
 void
@@ -40,12 +38,14 @@ LinkListDelete(LinkQueue& q)
 
 // 入队操作
 void
-LinkListPushTail(LinkQueue& q, const StateArray& state)
+LinkListPushTail(LinkQueue& q, const StateArray& state, MoveDirection operate)
 {
     // 创建新节点并设置状态
     LinkListNode* new_node = new LinkListNode;
     new_node->state        = state;
-    new_node->next_node = new_node->last_node = nullptr;
+    new_node->next_node    = nullptr;
+    new_node->last_node    = nullptr;
+    new_node->operate      = operate;
 
     // 如果队列为空，初始化新节点为队头和队尾
     if(q == nullptr)
@@ -67,19 +67,22 @@ LinkListPushTail(LinkQueue& q, const StateArray& state)
 
 // 出队操作
 void
-LinkListPopHead(LinkQueue& q, StateArray& front_array)
+LinkListPopHead(LinkQueue& q, StateArray& front_array, MoveDirection& operate)
 {
     if(q == nullptr) return;
 
     LinkListNode* front_node = q;
     front_array              = front_node->state;
+    operate                  = front_node->operate;
 
+    // 只有一个节点
     if(q->next_node == q)
     {
-        // 只有一个节点
+
         delete front_node;
         q = nullptr;
     }
+    // 有多个节点
     else
     {
         LinkListNode* tail = q->last_node;
@@ -105,16 +108,17 @@ bfs(const StateArray& start, const StateArray target, LinkQueue& path)
 {
     printf("开始 BFS 搜索...\n");
     std::unordered_map<StateArray, StateNode> state_info; // 记录每个状态的信息
-    LinkQueue                                 q;          // 队列用于 BFS
-    LinkListInit(q);                                      // 初始化队列
+    LinkQueue                                 queue;      // 队列用于 BFS
+    LinkListInit(queue);                                  // 初始化队列
 
     state_info[start] = { 0, "" };                        // 初始状态信息
-    LinkListPushTail(q, start);                           // 将初始状态入队
+    LinkListPushTail(queue, start, MoveDirection::NONE);  // 将初始状态入队
 
-    while(!LinkListIsEmpty(q))
+    while(!LinkListIsEmpty(queue))
     {
-        StateArray cur;
-        LinkListPopHead(q, cur); // 当前状态出队
+        StateArray    cur;
+        MoveDirection operate;
+        LinkListPopHead(queue, cur, operate); // 当前状态出队
 
         // 如果当前状态是目标状态
         if(cur == target)
@@ -122,15 +126,15 @@ bfs(const StateArray& start, const StateArray target, LinkQueue& path)
             printf("找到目标状态！\n");
 
             // 从目标状态向前回溯路径
-            StateArray s = target;
+            StateArray s = cur;
             while(s != start)
             {
-                LinkListPushTail(path, s);    // 将当前状态加入路径
-                s = state_info[s].last_state; // 复制上一个状态
+                LinkListPushTail(path, s, state_info[s].operate); // 将当前状态加入路径
+                s = state_info[s].last_state;                     // 复制上一个状态
             }
-            LinkListPushTail(path, start);
+            LinkListPushTail(path, start, MoveDirection::NONE);   // 将初始状态加入路径
 
-            return state_info[cur].min_steps; // 返回最小步数
+            return state_info[cur].min_steps;                     // 返回最小步数
         }
 
         // 获取当前状态中 '0' 的位置
@@ -141,24 +145,26 @@ bfs(const StateArray& start, const StateArray target, LinkQueue& path)
         // 尝试四个方向移动 '0'
         for(int i = 0; i < 4; ++i)
         {
+            MoveDirection dir = static_cast<MoveDirection>(i);
+
             int nx = 0;
             int ny = 0;
 
-            switch(i)
+            switch(dir)
             {
-            case UP:
+            case MoveDirection::UP:
                 nx = x;
                 ny = y - 1; // 向上移动
                 break;
-            case RIGHT:
+            case MoveDirection::RIGHT:
                 nx = x + 1; // 向右移动
                 ny = y;
                 break;
-            case DOWN:
+            case MoveDirection::DOWN:
                 nx = x;
                 ny = y + 1; // 向下移动
                 break;
-            case LEFT:
+            case MoveDirection::LEFT:
                 nx = x - 1; // 向左移动
                 ny = y;
                 break;
@@ -177,9 +183,9 @@ bfs(const StateArray& start, const StateArray target, LinkQueue& path)
                 // 如果新状态未被访问过
                 if(!state_info.count(next))
                 {
-                    StateNode new_state = { state_info[cur].min_steps + 1, cur };
-                    state_info[next]    = new_state; // 更新新状态的信息
-                    LinkListPushTail(q, next);       // 将新状态入队
+                    StateNode new_state = { state_info[cur].min_steps + 1, cur, dir };
+                    state_info[next]    = new_state;    // 更新新状态的信息
+                    LinkListPushTail(queue, next, dir); // 将新状态入队
                 }
             }
         }
@@ -214,7 +220,7 @@ main()
     else
     {
         printf("路径为:\n");
-        printf("最少步数为: %d\n", steps);
+        printf("最少步数为: %d\n\n", steps);
 
         if(LinkListIsEmpty(path))
         {
@@ -231,6 +237,29 @@ main()
 
             printf("移动%d次：\n", count);
             printState(current->state);
+
+            printf("上一个操作：\n");
+            MoveDirection dir = current->operate;
+            switch(dir)
+            {
+            case MoveDirection::UP:
+                printf("向下划动\n");
+                break;
+            case MoveDirection::RIGHT:
+                printf("向左划动\n");
+                break;
+            case MoveDirection::DOWN:
+                printf("向上划动\n");
+                break;
+            case MoveDirection::LEFT:
+                printf("向右划动\n");
+                break;
+            case MoveDirection::NONE:
+                printf("无操作\n");
+                break;
+            }
+
+            printf("\n");
 
             count++;
         } while(current != path); // 循环队列
