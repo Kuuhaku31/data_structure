@@ -94,6 +94,20 @@ LinkListPopHead(LinkQueue& q, StateArray& front_array, MoveDirection& operate)
     }
 }
 
+bool
+LinkListContains(const LinkQueue& list, const StateArray& state)
+{
+    LinkListNode* current = list;
+    if(current == nullptr) return false; // 如果队列为空，返回 false
+    do
+    {
+        if(current->state == state) return true; // 找到匹配的状态
+        current = current->next_node;
+    } while(current != list);
+
+    // 如果遍历完队列都没有找到匹配的状态，返回 false
+    return false;
+}
 
 // 检查队列是否为空
 bool

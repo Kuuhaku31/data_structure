@@ -48,6 +48,7 @@ void LinkListDelete(LinkQueue& list);                                           
 void LinkListPushTail(LinkQueue& list, const StateArray& state, MoveDirection operate); // 压入列表尾部
 void LinkListPopHead(LinkQueue& list, StateArray& front_array, MoveDirection& operate); // 弹出列表头部
 bool LinkListIsEmpty(const LinkQueue& list);                                            // 检查队列是否为空
+bool LinkListContains(const LinkQueue& list, const StateArray& state);                  // 检查队列是否包含某个状态
 
 void printState(const StateArray& state);
 

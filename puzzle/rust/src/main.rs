@@ -89,6 +89,11 @@ fn main()
             let mut writer = writer.lock().unwrap();
             writeln!(writer, "{}:{}", state, path).unwrap();
         }
+        else
+        {
+            let mut writer = writer.lock().unwrap();
+            writeln!(writer, "{}:{}", state, "x").unwrap();
+        }
         progress.inc(1);
     });
 
