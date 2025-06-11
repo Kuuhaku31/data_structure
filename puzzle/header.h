@@ -38,12 +38,12 @@ typedef struct LinkListNode
 
 // 定义移动方向
 
-void LinkListInit(LinkQueue& list);                                    // 初始化队列
-void LinkListDelete(LinkQueue& list);                                  // 删除队列
-void LinkListPushTail(LinkQueue& list, LinkListNode& res_node);        // 入队操作
-void LinkListPopHead(LinkQueue& list, LinkListNode& dst_node);         // 出队操作
-bool LinkListIsEmpty(const LinkQueue& list);                           // 检查队列是否为空
-bool LinkListContains(const LinkQueue& list, const StateArray& state); // 检查队列是否包含某个状态
+void          LinkListInit(LinkQueue& list);                                    // 初始化队列
+void          LinkListDelete(LinkQueue& list);                                  // 删除队列
+void          LinkListPushTail(LinkQueue& list, LinkListNode& res_node);        // 入队操作
+void          LinkListPopHead(LinkQueue& list, LinkListNode& dst_node);         // 出队操作
+bool          LinkListIsEmpty(const LinkQueue& list);                           // 检查队列是否为空
+LinkListNode* LinkListContains(const LinkQueue& list, const StateArray& state); // 检查队列是否包含某个状态
 
 void printState(const StateArray& state);
 
