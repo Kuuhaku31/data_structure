@@ -51,5 +51,7 @@ bool LinkListIsEmpty(const LinkQueue& list);                                    
 
 void printState(const StateArray& state);
 
+int BFS(const StateArray& start, const StateArray& target, LinkQueue& path); // 广度优先搜索
+
 
 #endif // PUZZLE_HEADER_H
