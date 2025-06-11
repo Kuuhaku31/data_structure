@@ -45,25 +45,25 @@ main()
             current = current->last_node; // 向前移动到上一个节点
 
             printf("移动%d次：\n", count);
-            printState(current->state);
+            printState(current->current_state);
 
             printf("上一个操作：\n");
-            MoveDirection dir = current->operate;
+            Operate dir = current->operate;
             switch(dir)
             {
-            case MoveDirection::UP:
+            case Operate::UP:
                 printf("向下划动\n");
                 break;
-            case MoveDirection::RIGHT:
+            case Operate::RIGHT:
                 printf("向左划动\n");
                 break;
-            case MoveDirection::DOWN:
+            case Operate::DOWN:
                 printf("向上划动\n");
                 break;
-            case MoveDirection::LEFT:
+            case Operate::LEFT:
                 printf("向右划动\n");
                 break;
-            case MoveDirection::NONE:
+            case Operate::NONE:
                 printf("无操作\n");
                 break;
             }

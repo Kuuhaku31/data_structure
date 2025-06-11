@@ -38,14 +38,14 @@ LinkListDelete(LinkQueue& q)
 
 // 入队操作
 void
-LinkListPushTail(LinkQueue& q, const StateArray& state, MoveDirection operate)
+LinkListPushTail(LinkQueue& q, const StateArray& state, Operate operate)
 {
     // 创建新节点并设置状态
-    LinkListNode* new_node = new LinkListNode;
-    new_node->state        = state;
-    new_node->next_node    = nullptr;
-    new_node->last_node    = nullptr;
-    new_node->operate      = operate;
+    LinkListNode* new_node  = new LinkListNode;
+    new_node->current_state = state;
+    new_node->next_node     = nullptr;
+    new_node->last_node     = nullptr;
+    new_node->operate       = operate;
 
     // 如果队列为空，初始化新节点为队头和队尾
     if(q == nullptr)
@@ -67,12 +67,12 @@ LinkListPushTail(LinkQueue& q, const StateArray& state, MoveDirection operate)
 
 // 出队操作
 void
-LinkListPopHead(LinkQueue& q, StateArray& front_array, MoveDirection& operate)
+LinkListPopHead(LinkQueue& q, StateArray& front_array, Operate& operate)
 {
     if(q == nullptr) return;
 
     LinkListNode* front_node = q;
-    front_array              = front_node->state;
+    front_array              = front_node->current_state;
     operate                  = front_node->operate;
 
     // 只有一个节点
@@ -101,7 +101,7 @@ LinkListContains(const LinkQueue& list, const StateArray& state)
     if(current == nullptr) return false; // 如果队列为空，返回 false
     do
     {
-        if(current->state == state) return true; // 找到匹配的状态
+        if(current->current_state == state) return true; // 找到匹配的状态
         current = current->next_node;
     } while(current != list);
 
@@ -127,12 +127,12 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
     LinkListInit(queue);                                     // 初始化队列
 
     state_info[start] = { 0, "" };                           // 初始状态信息
-    LinkListPushTail(queue, start, MoveDirection::NONE);     // 将初始状态入队
+    LinkListPushTail(queue, start, Operate::NONE);           // 将初始状态入队
 
     while(!LinkListIsEmpty(queue))
     {
-        StateArray    cur;
-        MoveDirection operate;
+        StateArray cur;
+        Operate    operate;
         LinkListPopHead(queue, cur, operate); // 当前状态出队
 
         // 如果当前状态是目标状态
@@ -147,9 +147,9 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
                 LinkListPushTail(path, s, state_info[s].operate); // 将当前状态加入路径
                 s = state_info[s].last_state;                     // 复制上一个状态
             }
-            LinkListPushTail(path, start, MoveDirection::NONE);   // 将初始状态加入路径
+            LinkListPushTail(path, start, Operate::NONE);         // 将初始状态加入路径
 
-            return state_info[cur].min_steps;                     // 返回最小步数
+            return state_info[cur].deep;                          // 返回最小步数
         }
 
         // 获取当前状态中 '0' 的位置
@@ -160,26 +160,26 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
         // 尝试四个方向移动 '0'
         for(int i = 0; i < 4; ++i)
         {
-            MoveDirection dir = static_cast<MoveDirection>(i);
+            Operate dir = static_cast<Operate>(i);
 
             int nx = 0;
             int ny = 0;
 
             switch(dir)
             {
-            case MoveDirection::UP:
+            case Operate::UP:
                 nx = x;
                 ny = y - 1; // 向上移动
                 break;
-            case MoveDirection::RIGHT:
+            case Operate::RIGHT:
                 nx = x + 1; // 向右移动
                 ny = y;
                 break;
-            case MoveDirection::DOWN:
+            case Operate::DOWN:
                 nx = x;
                 ny = y + 1; // 向下移动
                 break;
-            case MoveDirection::LEFT:
+            case Operate::LEFT:
                 nx = x - 1; // 向左移动
                 ny = y;
                 break;
@@ -199,13 +199,13 @@ BFS(const StateArray& start, const StateArray& target, LinkQueue& path)
                 if(!state_info.count(next))
                 {
                     LinkListNode new_state;
-                    new_state.min_steps  = state_info[cur].min_steps + 1; // 更新步数
-                    new_state.last_state = cur;                           // 记录上一个状态
-                    new_state.operate    = dir;                           // 记录操作方向
-                    new_state.state      = next;                          // 更新新状态
+                    new_state.deep          = state_info[cur].deep + 1; // 更新步数
+                    new_state.last_state    = cur;                      // 记录上一个状态
+                    new_state.operate       = dir;                      // 记录操作方向
+                    new_state.current_state = next;                     // 更新新状态
 
-                    state_info[next] = new_state;                         // 更新新状态的信息
-                    LinkListPushTail(queue, next, dir);                   // 将新状态入队
+                    state_info[next] = new_state;                       // 更新新状态的信息
+                    LinkListPushTail(queue, next, dir);                 // 将新状态入队
                 }
             }
         }

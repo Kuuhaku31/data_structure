@@ -10,7 +10,7 @@
 
 typedef std::string StateArray; // 定义一个状态数组为字符串类型，方便处理
 
-enum MoveDirection
+enum Operate
 {
     UP    = 0,
     RIGHT = 1,
@@ -24,11 +24,11 @@ enum MoveDirection
 // 队列类型定义为指向 LinkQueueNode 的指针
 typedef struct LinkListNode
 {
-    int min_steps;            // 最小步数
+    int deep;                 // 最小步数
 
-    StateArray    state;      // 队列中的状态数组
-    StateArray    last_state; // 上一个状态
-    MoveDirection operate;    // 操作（移动方向）
+    StateArray current_state; // 当前状态
+    StateArray last_state;    // 上一个状态
+    Operate    operate;       // 操作（移动方向）
 
     LinkListNode* last_node;  // 指向上一个节点
     LinkListNode* next_node;  // 指向下一个节点
@@ -38,12 +38,12 @@ typedef struct LinkListNode
 
 // 定义移动方向
 
-void LinkListInit(LinkQueue& list);                                                     // 初始化队列
-void LinkListDelete(LinkQueue& list);                                                   // 删除队列
-void LinkListPushTail(LinkQueue& list, const StateArray& state, MoveDirection operate); // 压入列表尾部
-void LinkListPopHead(LinkQueue& list, StateArray& front_array, MoveDirection& operate); // 弹出列表头部
-bool LinkListIsEmpty(const LinkQueue& list);                                            // 检查队列是否为空
-bool LinkListContains(const LinkQueue& list, const StateArray& state);                  // 检查队列是否包含某个状态
+void LinkListInit(LinkQueue& list);                                               // 初始化队列
+void LinkListDelete(LinkQueue& list);                                             // 删除队列
+void LinkListPushTail(LinkQueue& list, const StateArray& state, Operate operate); // 压入列表尾部
+void LinkListPopHead(LinkQueue& list, StateArray& front_array, Operate& operate); // 弹出列表头部
+bool LinkListIsEmpty(const LinkQueue& list);                                      // 检查队列是否为空
+bool LinkListContains(const LinkQueue& list, const StateArray& state);            // 检查队列是否包含某个状态
 
 void printState(const StateArray& state);
 
