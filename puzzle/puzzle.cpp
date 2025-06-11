@@ -15,12 +15,14 @@ printState(const StateArray& state)
     }
 }
 
+
 // 初始化队列
 void
 LinkListInit(LinkList& q)
 {
     q = nullptr; // 初始化为空队列
 }
+
 
 // 删除队列
 void
@@ -35,6 +37,7 @@ LinkListDelete(LinkList& q)
         delete temp;      // 删除当前节点
     }
 }
+
 
 // 入队操作
 void
@@ -70,6 +73,7 @@ LinkListPushTail(LinkList& list, LinkListNode& res_node)
     }
 }
 
+
 // 出队操作
 void
 LinkListPopHead(LinkList& list, LinkListNode& dst_node)
@@ -103,6 +107,7 @@ LinkListPopHead(LinkList& list, LinkListNode& dst_node)
     }
 }
 
+
 LinkListNode_ptr
 LinkListContains(const LinkList& list, const StateArray& state)
 {
@@ -118,6 +123,7 @@ LinkListContains(const LinkList& list, const StateArray& state)
     return nullptr;
 }
 
+
 // 检查队列是否为空
 bool
 LinkListIsEmpty(const LinkList& q)
@@ -131,15 +137,13 @@ int
 BFS(const StateArray& start_state, const StateArray& target_state, LinkList& path)
 {
     printf("开始 BFS 搜索...\n");
-    std::unordered_map<StateArray, LinkListNode> searched_nodes; // 记录每个状态的信息
-    LinkList                                     node_queue;     // 队列用于 BFS
-    LinkListInit(node_queue);                                    // 初始化队列
+    StateMap searched_nodes;  // 记录每个状态的信息
+    LinkList node_queue;      // 队列用于 BFS
+    LinkListInit(node_queue); // 初始化队列
 
 
     LinkListNode start_node;
-    start_node.deep          = 0;             // 初始状态步数为 0
     start_node.current_state = start_state;   // 设置初始状态
-    start_node.operate       = Operate::NONE; // 初始状态没有操作
     LinkListPushTail(node_queue, start_node); // 将初始状态入队
 
     searched_nodes[start_state] = start_node; // 记录初始状态的信息
@@ -207,20 +211,20 @@ BFS(const StateArray& start_state, const StateArray& target_state, LinkList& pat
                 int nz = ny * 3 + nx;
 
                 // 生成新状态
-                StateArray next = cur_node.current_state;
-                std::swap(next[z], next[nz]);
+                StateArray next_state = cur_node.current_state;
+                std::swap(next_state[z], next_state[nz]);
 
                 // 如果新状态未被访问过
-                if(!searched_nodes.count(next))
+                if(!searched_nodes.count(next_state))
                 {
-                    LinkListNode new_state;
-                    new_state.deep          = searched_nodes[cur_node.current_state].deep + 1; // 更新步数
-                    new_state.last_state    = cur_node.current_state;                          // 记录上一个状态
-                    new_state.operate       = dir;                                             // 记录操作方向
-                    new_state.current_state = next;                                            // 更新新状态
+                    LinkListNode new_node;
+                    new_node.deep          = searched_nodes[cur_node.current_state].deep + 1; // 更新步数
+                    new_node.last_state    = cur_node.current_state;                          // 记录上一个状态
+                    new_node.operate       = dir;                                             // 记录操作方向
+                    new_node.current_state = next_state;                                      // 更新新状态
 
-                    searched_nodes[next] = new_state;                                          // 更新新状态的信息
-                    LinkListPushTail(node_queue, new_state);                                   // 将新状态入队
+                    searched_nodes[next_state] = new_node;                                    // 更新新状态的信息
+                    LinkListPushTail(node_queue, new_node);                                   // 将新状态入队
                 }
             }
         }

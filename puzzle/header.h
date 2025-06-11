@@ -10,6 +10,7 @@
 
 typedef std::string StateArray; // 定义一个状态数组为字符串类型，方便处理
 
+// 定义操作方向的枚举类型
 enum Operate
 {
     UP    = 0,
@@ -19,12 +20,11 @@ enum Operate
     NONE  = 4,
 };
 
-
 // 循环链式队列节点
 // 队列类型定义为指向 LinkQueueNode 的指针
 typedef struct LinkListNode
 {
-    int deep = -1;                            // 最小步数
+    int deep = 0;                             // 最小步数
 
     StateArray current_state = "";            // 当前状态
     StateArray last_state    = "";            // 上一个状态
@@ -35,8 +35,10 @@ typedef struct LinkListNode
 
 } LinkListNode, *LinkListNode_ptr, *LinkList;
 
+typedef std::unordered_map<StateArray, LinkListNode> StateMap; // 定义状态映射，用于记录每个状态的信息
 
-// 定义移动方向
+
+// 函数声明
 
 void             LinkListInit(LinkList& list);                                    // 初始化队列
 void             LinkListDelete(LinkList& list);                                  // 删除队列
