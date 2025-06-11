@@ -1,7 +1,6 @@
 
 // puzzle/main.cpp
 #include <algorithm>
-#include <iostream>
 #include <queue>
 #include <string>
 #include <unordered_map>
@@ -20,10 +19,10 @@ printState(const string& state)
 {
     for(int i = 0; i < 9; ++i)
     {
-        cout << state[i] << ' ';
-        if(i % 3 == 2) cout << '\n';
+        printf("%c ", state[i]);
+        if(i % 3 == 2) printf("\n");
     }
-    cout << '\n';
+    printf("\n");
 }
 
 // BFS + 路径恢复
@@ -96,11 +95,11 @@ int
 main()
 {
     string start;
-    cout << "请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n";
+    printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
     for(int i = 0; i < 9; ++i)
     {
         char ch;
-        cin >> ch;
+        scanf(" %c", &ch);
         start += ch;
     }
 
@@ -110,15 +109,15 @@ main()
 
     if(steps == -1)
     {
-        cout << "无法达到目标状态。\n";
+        printf("无法达到目标状态。\n");
     }
     else
     {
-        cout << "最少步数为: " << steps << "\n";
-        cout << "路径如下（共 " << path.size() << " 步）:\n\n";
+        printf("最少步数为: %d\n", steps);
+        printf("路径如下（共 %d 步）:\n\n", path.size());
         for(int i = 0; i < path.size(); ++i)
         {
-            cout << "Step " << i << ":\n";
+            printf("Step %d:\n", i);
             printState(path[i]);
         }
     }
