@@ -15,7 +15,7 @@ main()
         start += ch;
     }
 
-    LinkQueue path;
+    LinkList path;
     LinkListInit(path);              // 初始化路径队列
 
     StateArray target = "123456780"; // 目标状态

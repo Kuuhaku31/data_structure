@@ -33,21 +33,21 @@ typedef struct LinkListNode
     LinkListNode* last_node = nullptr;        // 指向上一个节点
     LinkListNode* next_node = nullptr;        // 指向下一个节点
 
-} LinkListNode, *LinkQueue;
+} LinkListNode, *LinkListNode_ptr, *LinkList;
 
 
 // 定义移动方向
 
-void          LinkListInit(LinkQueue& list);                                    // 初始化队列
-void          LinkListDelete(LinkQueue& list);                                  // 删除队列
-void          LinkListPushTail(LinkQueue& list, LinkListNode& res_node);        // 入队操作
-void          LinkListPopHead(LinkQueue& list, LinkListNode& dst_node);         // 出队操作
-bool          LinkListIsEmpty(const LinkQueue& list);                           // 检查队列是否为空
-LinkListNode* LinkListContains(const LinkQueue& list, const StateArray& state); // 检查队列是否包含某个状态
+void             LinkListInit(LinkList& list);                                    // 初始化队列
+void             LinkListDelete(LinkList& list);                                  // 删除队列
+void             LinkListPushTail(LinkList& list, LinkListNode& res_node);        // 入队操作
+void             LinkListPopHead(LinkList& list, LinkListNode& dst_node);         // 出队操作
+bool             LinkListIsEmpty(const LinkList& list);                           // 检查队列是否为空
+LinkListNode_ptr LinkListContains(const LinkList& list, const StateArray& state); // 检查队列是否包含某个状态
 
 void printState(const StateArray& state);
 
-int BFS(const StateArray& start, const StateArray& target, LinkQueue& path); // 广度优先搜索
+int BFS(const StateArray& start, const StateArray& target, LinkList& path); // 广度优先搜索
 
 
 #endif // PUZZLE_HEADER_H
