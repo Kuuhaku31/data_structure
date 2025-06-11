@@ -1,43 +1,36 @@
 
 // puzzle/main.cpp
 
-#include <string>
-#include <unordered_map>
+#include "header.h"
 
 
-typedef std::string StateArray; // 定义一个状态数组为字符串类型，方便处理
-
-// 循环链式队列节点
-// 队列类型定义为指向 LinkQueueNode 的指针
-typedef struct LinkQueueNode
+// 打印 3x3 状态
+void
+printState(const StateArray& state)
 {
-    StateArray     state;     // 队列中的状态数组
-    LinkQueueNode* last_node; // 指向上一个节点
-    LinkQueueNode* next_node; // 指向下一个节点
+    for(int i = 0; i < 9; ++i)
+    {
+        printf("%c ", state[i]);
+        if(i % 3 == 2) printf("\n");
+    }
+    printf("\n");
+}
 
-} LinkQueueNode, *LinkQueue;
-
-
-void LinkQueueInit(LinkQueue& q);
-void LinkQueueDelete(LinkQueue& q);
-void LinkQueueEnqueue(LinkQueue& q, const StateArray& state);
-void LinkQueueDequeue(LinkQueue& q, StateArray& front_array);
-bool LinkQueueIsEmpty(const LinkQueue& q);
 
 // 初始化队列
 void
-LinkQueueInit(LinkQueue& q)
+LinkListInit(LinkQueue& q)
 {
     q = nullptr; // 初始化为空队列
 }
 
 // 删除队列
 void
-LinkQueueDelete(LinkQueue& q)
+LinkListDelete(LinkQueue& q)
 {
     while(q != nullptr)
     {
-        LinkQueueNode* temp = q;
+        LinkListNode* temp = q;
 
         q = q->next_node; // 移动到下一个节点
 
@@ -47,11 +40,11 @@ LinkQueueDelete(LinkQueue& q)
 
 // 入队操作
 void
-LinkQueueEnqueue(LinkQueue& q, const StateArray& state)
+LinkListPushTail(LinkQueue& q, const StateArray& state)
 {
     // 创建新节点并设置状态
-    LinkQueueNode* new_node = new LinkQueueNode;
-    new_node->state         = state;
+    LinkListNode* new_node = new LinkListNode;
+    new_node->state        = state;
     new_node->next_node = new_node->last_node = nullptr;
 
     // 如果队列为空，初始化新节点为队头和队尾
@@ -64,7 +57,7 @@ LinkQueueEnqueue(LinkQueue& q, const StateArray& state)
     // 如果队列不为空，将新节点添加到队尾
     else
     {
-        LinkQueueNode* tail = q->last_node;
+        LinkListNode* tail  = q->last_node;
         tail->next_node     = new_node;
         new_node->last_node = tail;
         new_node->next_node = q;
@@ -74,12 +67,12 @@ LinkQueueEnqueue(LinkQueue& q, const StateArray& state)
 
 // 出队操作
 void
-LinkQueueDequeue(LinkQueue& q, StateArray& front_array)
+LinkListPopHead(LinkQueue& q, StateArray& front_array)
 {
     if(q == nullptr) return;
 
-    LinkQueueNode* front_node = q;
-    front_array               = front_node->state;
+    LinkListNode* front_node = q;
+    front_array              = front_node->state;
 
     if(q->next_node == q)
     {
@@ -89,10 +82,10 @@ LinkQueueDequeue(LinkQueue& q, StateArray& front_array)
     }
     else
     {
-        LinkQueueNode* tail = q->last_node;
-        LinkQueueNode* next = q->next_node;
-        tail->next_node     = next;
-        next->last_node     = tail;
+        LinkListNode* tail = q->last_node;
+        LinkListNode* next = q->next_node;
+        tail->next_node    = next;
+        next->last_node    = tail;
         delete front_node;
         q = next;
     }
@@ -100,7 +93,7 @@ LinkQueueDequeue(LinkQueue& q, StateArray& front_array)
 
 // 检查队列是否为空
 bool
-LinkQueueIsEmpty(const LinkQueue& q)
+LinkListIsEmpty(const LinkQueue& q)
 {
     return q == nullptr; // 如果队列为空，返回 true
 }
@@ -116,27 +109,6 @@ const int move_vector[4][2] = {
     { -1, +0 }  // 左
 };
 
-// 打印 3x3 状态
-void
-printState(const StateArray& state)
-{
-    for(int i = 0; i < 9; ++i)
-    {
-        printf("%c ", state[i]);
-        if(i % 3 == 2) printf("\n");
-    }
-    printf("\n");
-}
-
-
-typedef struct StateNode
-{
-    int        min_steps;  // 最小步数
-    StateArray last_state; // 上一个状态
-
-} StateNode;
-
-
 // BFS + 路径恢复
 int
 bfs(const StateArray& start, LinkQueue& path)
@@ -144,15 +116,15 @@ bfs(const StateArray& start, LinkQueue& path)
     printf("开始 BFS 搜索...\n");
     std::unordered_map<StateArray, StateNode> state_info; // 记录每个状态的信息
     LinkQueue                                 q;          // 队列用于 BFS
-    LinkQueueInit(q);                                     // 初始化队列
+    LinkListInit(q);                                      // 初始化队列
 
     state_info[start] = { 0, "" };                        // 初始状态信息
-    LinkQueueEnqueue(q, start);                           // 将初始状态入队
+    LinkListPushTail(q, start);                           // 将初始状态入队
 
-    while(!LinkQueueIsEmpty(q))
+    while(!LinkListIsEmpty(q))
     {
         StateArray cur;
-        LinkQueueDequeue(q, cur); // 当前状态出队
+        LinkListPopHead(q, cur); // 当前状态出队
 
         // 如果当前状态是目标状态
         if(cur == TARGET)
@@ -163,10 +135,10 @@ bfs(const StateArray& start, LinkQueue& path)
             StateArray s = TARGET;
             while(s != start)
             {
-                LinkQueueEnqueue(path, s);    // 将当前状态加入路径
+                LinkListPushTail(path, s);    // 将当前状态加入路径
                 s = state_info[s].last_state; // 复制上一个状态
             }
-            LinkQueueEnqueue(path, start);
+            LinkListPushTail(path, start);
 
             return state_info[cur].min_steps; // 返回最小步数
         }
@@ -196,7 +168,7 @@ bfs(const StateArray& start, LinkQueue& path)
                 if(!state_info.count(next))
                 {
                     state_info[next] = { state_info[cur].min_steps + 1, cur }; // 更新新状态的信息
-                    LinkQueueEnqueue(q, next);                                 // 将新状态入队
+                    LinkListPushTail(q, next);                                 // 将新状态入队
                 }
             }
         }
@@ -218,7 +190,7 @@ main()
     }
 
     LinkQueue path;
-    LinkQueueInit(path); // 初始化路径队列
+    LinkListInit(path); // 初始化路径队列
 
     int steps = bfs(start, path);
 
@@ -231,15 +203,15 @@ main()
         printf("路径为:\n");
         printf("最少步数为: %d\n", steps);
 
-        if(LinkQueueIsEmpty(path))
+        if(LinkListIsEmpty(path))
         {
             printf("路径为空。\n");
             return 0;
         }
 
         // 从循环队尾开始打印路径
-        int            count   = 0;
-        LinkQueueNode* current = path;
+        int           count   = 0;
+        LinkListNode* current = path;
         do
         {
             current = current->last_node; // 向前移动到上一个节点

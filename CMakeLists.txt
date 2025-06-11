@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME} "./ignore/main.cpp")
 
 # puzzle
 project(puzzle)
+include_directories("./puzzle")
 add_executable(${PROJECT_NAME}
 
     "./puzzle/main.cpp"
