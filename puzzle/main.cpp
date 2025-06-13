@@ -4,15 +4,24 @@
 #include "header.h"
 
 int
-main()
+main(int argc, char* argv[])
 {
     StateArray start;
-    printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
-    for(int i = 0; i < 9; ++i)
+
+    if(argc > 1)
     {
-        char ch;
-        scanf(" %c", &ch);
-        start += ch;
+        start = argv[1]; // 从命令行参数获取初始状态
+        printf("初始状态为: %s\n", start.c_str());
+    }
+    else
+    {
+        printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
+        for(int i = 0; i < 9; ++i)
+        {
+            char ch;
+            scanf(" %c", &ch);
+            start += ch;
+        }
     }
 
     LinkList path;
