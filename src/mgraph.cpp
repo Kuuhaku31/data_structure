@@ -40,13 +40,13 @@ CreateGraphF(MGraph& G)
 {
     std::string filename;
 
-    // printf("请输入图的种类（0-有向图，1-有向网，2-无向图，3-无向网）: ");
+    printf("请输入图的种类（0-有向图，1-有向网，2-无向图，3-无向网）: ");
     scanf("%d", &G.kind);
-    // printf("请输入数据文件名: ");
+    printf("请输入数据文件名: ");
     scanf("%s", filename.c_str());
 
     // 打开文件
-    // printf("打开文件 %s...\n", filename.c_str());
+    printf("打开文件 %s...\n", filename.c_str());
     FILE* file = fopen(filename.c_str(), "r");
     if(!file)
     {

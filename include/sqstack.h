@@ -17,8 +17,8 @@
 #define STACKINCREMENT 10   // 存储空间分配增量
 
 
-typedef BiTNode* SElemType;
-typedef int      SElemType; // 定义栈元素类型为整型
+// typedef BiTNode* SElemType;
+typedef int SElemType; // 定义栈元素类型为整型
 
 
 /* 顺序栈类型定义 */

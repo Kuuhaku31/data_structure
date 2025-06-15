@@ -29,3 +29,19 @@ add_executable(${PROJECT_NAME}
 
     # "./ignore/puzzle.cpp"
 )
+
+# hash
+project(hash)
+add_executable(${PROJECT_NAME}
+
+    "./src/hashlink.cpp"
+)
+
+# dij
+project(dij)
+add_executable(${PROJECT_NAME}
+    "./src/mgraph.cpp"
+    "./src/sqstack.cpp"
+    "./src/sqqueue.cpp"
+    "./src/algorithm/dij.cpp"
+)
