@@ -101,7 +101,7 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
 int
 main(int argc, char* argv[])
 {
-    printf("3x3 拼图求解器\n");
+    printf("3x3 拼图求解器\n\n");
 
     State    start_state;
     State    target_state;
@@ -139,6 +139,7 @@ main(int argc, char* argv[])
         if(path == nullptr) printf("无法达到目标状态\n");
         else
         {
+            printf("找到目标状态！\n");
             printf("最少步数为: %d\n\n", path->deep);
             SavePathToFile(path, "path.txt");      // 保存路径到文件
         }

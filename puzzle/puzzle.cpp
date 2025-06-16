@@ -3,8 +3,6 @@
 
 #include "header.h"
 
-#include <stdio.h>
-
 
 // 设置 3x3 状态
 void
@@ -13,16 +11,6 @@ StateSet(State& state, const char* str)
     for(int i = 0; i < 9; ++i) state.data[i] = str[i];
 }
 
-// 打印 3x3 状态
-void
-StatePrint(const State& state)
-{
-    for(int i = 0; i < 9; ++i)
-    {
-        printf("%c ", state.data[i]);
-        if(i % 3 == 2) printf("\n");
-    }
-}
 
 // 检查两个状态是否相等
 bool
@@ -35,6 +23,7 @@ StateEqual(const State& a, const State& b)
     return true;                                 // 所有字符都相等，返回 true
 }
 
+
 // 查找状态中 '0' 的位置
 int
 StateFindZero(const State& state)
@@ -45,6 +34,7 @@ StateFindZero(const State& state)
     }
     return -1;                             // 如果没有找到 '0'，返回 -1
 }
+
 
 // 交换状态中两个位置的值
 void
@@ -150,8 +140,6 @@ LinkListIsEmpty(const LinkList& q)
     return q == nullptr; // 如果队列为空，返回 true
 }
 
-
-// 哈希表的哈希函数
 
 // 计算状态的哈希值
 unsigned
@@ -262,33 +250,30 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
     start_node.current_state = start_state;                           // 设置初始状态
     Node_ptr start_node_ptr  = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
     LinkListPushTail(node_queue, start_node_ptr);                     // 将初始状态入队
-
-
     while(!LinkListIsEmpty(node_queue))
     {
-        Node cur_node;
-        LinkListPopHead(node_queue, cur_node); // 当前状态出队
+        // 当前状态出队
+        Node current_node;
+        LinkListPopHead(node_queue, current_node);
 
         // 如果当前状态是目标状态
-        if(StateEqual(cur_node.current_state, target_state))
+        if(StateEqual(current_node.current_state, target_state))
         {
-            printf("找到目标状态！\n");
-
             // 从目标状态向前回溯路径
-            State s = cur_node.current_state;
-            while(!StateEqual(s, start_state))
+            State state = current_node.current_state;
+            while(!StateEqual(state, start_state))
             {
-                Node_ptr state_info_node = StateMapSearch(state_map, s); // 查找当前状态的信息
-                LinkListPushTail(path, state_info_node);                 // 将当前状态加入路径
-                s = state_info_node->last_state;                         // 复制上一个状态
+                Node_ptr state_info_node = StateMapSearch(state_map, state); // 查找当前状态的信息
+                LinkListPushTail(path, state_info_node);                     // 将当前状态加入路径
+                state = state_info_node->last_state;                         // 复制上一个状态
             }
-            LinkListPushTail(path, start_node_ptr);                      // 将初始状态加入路径
+            LinkListPushTail(path, start_node_ptr);                          // 将初始状态加入路径
 
             break;
         }
 
         // 获取当前状态中 '0' 的位置
-        int z = StateFindZero(cur_node.current_state);
+        int z = StateFindZero(current_node.current_state);
         int x = z % 3;
         int y = z / 3;
 
@@ -327,7 +312,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                 int nz = ny * 3 + nx;
 
                 // 生成新状态
-                State next_state = cur_node.current_state;
+                State next_state = current_node.current_state;
                 StateSwap(next_state, z, nz);
 
                 // 如果新状态未被访问过
@@ -335,10 +320,10 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                 {
                     // 创建新节点并设置状态
                     Node next_node;
-                    next_node.deep          = cur_node.deep + 1;      // 更新步数
-                    next_node.current_state = next_state;             // 更新新状态
-                    next_node.last_state    = cur_node.current_state; // 记录上一个状态
-                    next_node.operate       = dir;                    // 记录操作方向
+                    next_node.deep          = current_node.deep + 1;      // 更新步数
+                    next_node.current_state = next_state;                 // 更新新状态
+                    next_node.last_state    = current_node.current_state; // 记录上一个状态
+                    next_node.operate       = dir;                        // 记录操作方向
 
                     // 插入新状态到哈希表
                     Node_ptr new_map_node = StateMapInsert(state_map, next_node);

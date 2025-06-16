@@ -49,7 +49,6 @@ struct Node
 /* 函数声明 */
 
 void     StateSet(State& state, const char* str);                                       // 设置状态
-void     StatePrint(const State& state);                                                // 打印 3x3 状态
 bool     StateEqual(const State& a, const State& b);                                    // 检查两个状态是否相等
 int      StateFindZero(const State& state);                                             // 查找状态中 '0' 的位置
 void     StateSwap(State& state, int index1, int index2);                               // 交换状态中两个位置的值
