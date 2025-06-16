@@ -221,23 +221,17 @@ StateMapInsert(StateMap& map, const LinkListNode& node)
 
 // BFS + 路径恢复
 int
-BFS(const StateArray& start_state, const StateArray& target_state, LinkList& path)
+BFS(const StateArray& start_state, const StateArray& target_state, StateMap& state_map, LinkList& path)
 {
     printf("开始 BFS 搜索...\n");
-    StateMap searched_nodes;             // 记录每个状态的信息
-    LinkList node_queue;                 // 队列用于 BFS
 
-    StateMapInit(searched_nodes, 10000); // 初始化状态映射，容量为 10000
-    LinkListInit(node_queue);            // 初始化队列
+    LinkList node_queue;      // 队列用于 BFS
+    LinkListInit(node_queue); // 初始化队列
 
-
-    static LinkListNode start_node;
-    start_node.current_state  = start_state;                                // 设置初始状态
-    LinkListNode_ptr new_node = StateMapInsert(searched_nodes, start_node); // 插入初始状态到哈希表
-    LinkListPushTail(node_queue, new_node);                                 // 将初始状态入队
-
-
-    // searched_nodes[start_state] = start_node; // 记录初始状态的信息
+    LinkListNode start_node;
+    start_node.current_state        = start_state;                           // 设置初始状态
+    LinkListNode_ptr start_node_ptr = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
+    LinkListPushTail(node_queue, start_node_ptr);                            // 将初始状态入队
 
 
     while(!LinkListIsEmpty(node_queue))
@@ -254,26 +248,13 @@ BFS(const StateArray& start_state, const StateArray& target_state, LinkList& pat
             StateArray s = cur_node.current_state;
             while(s != start_state)
             {
-                // LinkListNode state_info_node = searched_nodes[s]; // 获取当前状态的信息
-                // LinkListPushTail(path, state_info_node);          // 将当前状态加入路径
-                // s = searched_nodes[s].last_state;                 // 复制上一个状态
-
-
-                LinkListNode_ptr state_info_node = StateMapSearch(searched_nodes, s); // 查找当前状态的信息
-                if(state_info_node)
-                {
-                    LinkListPushTail(path, state_info_node); // 将当前状态加入路径
-                    s = state_info_node->last_state;         // 复制上一个状态
-                }
-                else
-                {
-                    printf("错误：未找到状态 %s 的信息。\n", s.c_str());
-                    return -1; // 如果找不到状态信息，返回错误
-                }
+                LinkListNode_ptr state_info_node = StateMapSearch(state_map, s); // 查找当前状态的信息
+                LinkListPushTail(path, state_info_node);                         // 将当前状态加入路径
+                s = state_info_node->last_state;                                 // 复制上一个状态
             }
-            LinkListPushTail(path, &start_node); // 将初始状态加入路径
+            LinkListPushTail(path, start_node_ptr);                              // 将初始状态加入路径
 
-            return cur_node.deep;                // 返回最小步数
+            return cur_node.deep;                                                // 返回最小步数
         }
 
         // 获取当前状态中 '0' 的位置
@@ -320,7 +301,7 @@ BFS(const StateArray& start_state, const StateArray& target_state, LinkList& pat
                 std::swap(next_state[z], next_state[nz]);
 
                 // 如果新状态未被访问过
-                if(!StateMapSearch(searched_nodes, next_state))
+                if(!StateMapSearch(state_map, next_state))
                 {
                     // 创建新节点并设置状态
                     LinkListNode next_node;
@@ -330,24 +311,11 @@ BFS(const StateArray& start_state, const StateArray& target_state, LinkList& pat
                     next_node.operate       = dir;                    // 记录操作方向
 
                     // 插入新状态到哈希表
-                    LinkListNode_ptr new_map_node = StateMapInsert(searched_nodes, next_node);
+                    LinkListNode_ptr new_map_node = StateMapInsert(state_map, next_node);
 
                     // 将新状态入队
                     LinkListPushTail(node_queue, new_map_node);
                 }
-
-                // 如果新状态未被访问过，则将其入队
-                // if(!searched_nodes.count(next_state))
-                // {
-                //     LinkListNode new_node;
-                //     new_node.deep          = searched_nodes[cur_node.current_state].deep + 1; // 更新步数
-                //     new_node.last_state    = cur_node.current_state;                          // 记录上一个状态
-                //     new_node.operate       = dir;                                             // 记录操作方向
-                //     new_node.current_state = next_state;                                      // 更新新状态
-
-                //     searched_nodes[next_state] = new_node;                                    // 更新新状态的信息
-                //     LinkListPushTail(node_queue, new_node);                                   // 将新状态入队
-                // }
             }
         }
     }

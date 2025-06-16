@@ -83,7 +83,13 @@ unsigned         StateMapHash(const StateArray& state, int m);                 /
 
 void printState(const StateArray& state);
 
-int BFS(const StateArray& start, const StateArray& target, LinkList& path); // 广度优先搜索
+// 广度优先搜索函数声明
+// 参数说明：
+// start - 初始状态
+// target - 目标状态
+// state_map - 状态映射，用于记录每个状态的信息
+// path - 用于存储找到的路径
+int BFS(const StateArray& start, const StateArray& target, StateMap& state_map, LinkList& path); // 广度优先搜索
 
 
 #endif // PUZZLE_HEADER_H
