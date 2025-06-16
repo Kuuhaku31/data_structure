@@ -160,7 +160,7 @@ StateMapHash(const State& state)
     unsigned hash_value = 0;
     for(char c : state.data)
     {
-        hash_value = (hash_value * 31 + c) % HASH_SIZE; // 使用简单的哈希函数
+        hash_value = (hash_value * 114514 + c) % HASH_SIZE; // 使用简单的哈希函数
     }
     return hash_value;
 }
