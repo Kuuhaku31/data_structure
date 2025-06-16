@@ -25,28 +25,26 @@ enum Operate
     NONE  = 4,
 };
 
-// 节点
-typedef struct Node
+
+typedef struct Node Node;          // 节点
+
+typedef Node* Node_ptr;            // 节点指针
+typedef Node* LinkList;            // 链式队列
+typedef Node* StateMap[HASH_SIZE]; // 哈希表，存储状态映射
+
+struct Node
 {
-    int deep = 0;                    // 最小步数
+    int deep = 0;                      // 最小步数
 
-    State   current_state;           // 当前状态
-    State   last_state;              // 上一个状态
-    Operate operate = Operate::NONE; // 操作（移动方向）
+    State   current_state;             // 当前状态
+    State   last_state;                // 上一个状态
+    Operate operate = Operate::NONE;   // 操作（移动方向）
 
-    Node* last_list_node = nullptr;  // 指向上一个队列节点
-    Node* next_list_node = nullptr;  // 指向下一个队列节点
+    Node_ptr last_list_node = nullptr; // 指向上一个队列节点
+    Node_ptr next_list_node = nullptr; // 指向下一个队列节点
 
-    Node* last_map_node = nullptr;   // 指向上一个哈希表节点
-    Node* next_map_node = nullptr;   // 指向下一个哈希表节点
-
-} Node, *Node_ptr, *LinkList, **MapListList;
-
-
-// 哈希表
-struct StateMap
-{
-    LinkList rcd[HASH_SIZE] = { nullptr }; // 哈希表的记录，使用链式存储
+    Node_ptr last_map_node = nullptr;  // 指向上一个哈希表节点
+    Node_ptr next_map_node = nullptr;  // 指向下一个哈希表节点
 };
 
 

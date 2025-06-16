@@ -171,10 +171,9 @@ void
 StateMapInit(StateMap& map)
 {
     // 分配指针数组内存
-    // map.rcd = new Node_ptr[HASH_SIZE];
     for(int i = 0; i < HASH_SIZE; ++i)
     {
-        map.rcd[i] = nullptr; // 初始化每个指针为 nullptr
+        map[i] = nullptr; // 初始化每个指针为 nullptr
     }
 }
 
@@ -183,13 +182,11 @@ StateMapInit(StateMap& map)
 void
 StateMapDestroy(StateMap& map)
 {
-    if(!map.rcd) return; // 如果指针数组为空，直接返回
-
     // 遍历每个链表，释放节点内存
     for(int i = 0; i < HASH_SIZE; ++i)
     {
         Node_ptr temp    = nullptr;
-        Node_ptr current = map.rcd[i];
+        Node_ptr current = map[i];
         while(current)
         {
             temp    = current;
@@ -207,7 +204,7 @@ StateMapSearch(const StateMap& map, const State& state)
     unsigned index = StateMapHash(state); // 计算哈希值
 
     // 遍历链表查找状态
-    Node_ptr current = map.rcd[index];
+    Node_ptr current = map[index];
     while(current)
     {
         if(StateEqual(current->current_state, state)) return current; // 找到匹配的状态
@@ -228,7 +225,7 @@ StateMapInsert(StateMap& map, const Node& node)
     // 检查是否已存在相同状态
     // 如果已存在相同状态，直接返回
     bool     found   = false;
-    Node_ptr current = map.rcd[index];
+    Node_ptr current = map[index];
     while(current)
     {
         if(StateEqual(current->current_state, node.current_state)) // 比较当前状态
@@ -246,8 +243,8 @@ StateMapInsert(StateMap& map, const Node& node)
     new_node->current_state = node.current_state; // 设置当前状态
 
     // 将新节点插入到哈希表中
-    new_node->next_map_node = map.rcd[index]; // 新节点指向当前链表头
-    map.rcd[index]          = new_node;       // 更新链表头为新节点
+    new_node->next_map_node = map[index]; // 新节点指向当前链表头
+    map[index]              = new_node;   // 更新链表头为新节点
 
     // 返回新节点指针
     return new_node;
