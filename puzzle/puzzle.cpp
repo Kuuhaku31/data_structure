@@ -255,8 +255,6 @@ StateMapInsert(StateMap& map, const Node& node)
 int
 BFS(const State& start_state, const State& target_state, StateMap& state_map, LinkList& path)
 {
-    printf("开始 BFS 搜索...\n");
-
     LinkList node_queue;      // 队列用于 BFS
     LinkListInit(node_queue); // 初始化队列
 

@@ -11,11 +11,7 @@
 void
 SavePathToFile(const LinkList& path, const char* filename)
 {
-    if(path == nullptr)
-    {
-        printf("路径为空，无法保存到文件。\n");
-        return;
-    }
+    if(path == nullptr) return;
 
     FILE* file = fopen(filename, "w");
     if(!file)
@@ -25,7 +21,6 @@ SavePathToFile(const LinkList& path, const char* filename)
     }
 
     // 处理循环队列
-
     // 从循环队尾开始打印路径
     int   count   = 0;
     Node* current = path;
@@ -68,6 +63,7 @@ SavePathToFile(const LinkList& path, const char* filename)
     fclose(file);
 }
 
+
 // 保存状态映射到文件
 void
 SaveMapToFile(const StateMap& state_map, const char* filename)
@@ -100,49 +96,55 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
     fclose(file);
 }
 
+
 // puzzle.exe < 初始状态 > < 目标状态（默认为 123456780） >
 int
 main(int argc, char* argv[])
 {
-    State start;
-    State target;
-
-    if(argc < 2)
-    {
-        printf("请提供初始状态字符串（例如: 123456780）\n");
-        return 1;
-    }
-    StateSet(start, argv[1]);                   // 设置初始状态
-    if(argc < 3) StateSet(target, "123456780"); // 设置默认目标状态
-    else StateSet(target, argv[2]);             // 设置目标状态
-
+    int      deep = -1;
+    State    start_state;
+    State    target_state;
     LinkList path;
     StateMap state_map;
-    LinkListInit(path);           // 初始化路径队列
-    StateMapInit(state_map);      // 初始化状态映射
+    LinkListInit(path);      // 初始化路径队列
+    StateMapInit(state_map); // 初始化状态映射
 
-    clock_t start_time = clock(); // 记录开始时间
-
-    int steps = BFS(start, target, state_map, path);
-
-    clock_t end_time     = clock();                                                     // 记录结束时间
-    double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
-    printf("BFS 搜索完成，耗时: %.2f 秒\n", elapsed_time);
-
-    if(steps == -1)
+    // 设置初始状态和目标状态
     {
-        printf("无法达到目标状态\n");
-    }
-    else
-    {
-        printf("最少步数为: %d\n\n", steps);
-        SavePathToFile(path, "path.txt"); // 保存路径到文件
+        if(argc < 2)
+        {
+            printf("请提供初始状态字符串（例如: 123456780）\n");
+            return 1;
+        }
+        StateSet(start_state, argv[1]);                   // 设置初始状态
+        if(argc < 3) StateSet(target_state, "123456780"); // 设置默认目标状态
+        else StateSet(target_state, argv[2]);             // 设置目标状态
     }
 
-    SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件
+    // 开始 BFS 搜索
+    {
+        printf("开始 BFS 搜索...\n");
+        clock_t start_time = clock(); // 记录开始时间
 
-    // 销毁状态映射
-    StateMapDestroy(state_map);
+        deep = BFS(start_state, target_state, state_map, path);
+
+        clock_t end_time     = clock();                                                     // 记录结束时间
+        double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
+        printf("BFS 搜索完成，耗时: %.2f 秒\n", elapsed_time);
+    }
+
+    // 处理结果
+    {
+        if(deep == -1) printf("无法达到目标状态\n");
+        else
+        {
+            printf("最少步数为: %d\n\n", deep);
+            SavePathToFile(path, "path.txt");      // 保存路径到文件
+        }
+        SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件
+    }
+
+    StateMapDestroy(state_map); // 销毁状态映射
 
     return 0;
 }
