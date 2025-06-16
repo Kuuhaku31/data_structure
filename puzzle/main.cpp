@@ -9,7 +9,7 @@
 
 // 保存解法到文件
 void
-SavePathToFile(const LinkList& path, const char* filename)
+SavePathToFile(const LinkQueue& path, const char* filename)
 {
     FILE* file = fopen(filename, "w");
     if(!file)
@@ -101,11 +101,11 @@ main(int argc, char* argv[])
 {
     printf("3x3 拼图求解器\n\n");
 
-    State    start_state;
-    State    target_state;
-    LinkList path;
-    StateMap state_map;
-    LinkListInit(path);      // 初始化路径队列
+    State     start_state;
+    State     target_state;
+    LinkQueue path;
+    StateMap  state_map;
+    LinkQueueInit(path);     // 初始化路径队列
     StateMapInit(state_map); // 初始化状态映射
 
     // 设置初始状态和目标状态

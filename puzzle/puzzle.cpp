@@ -48,7 +48,7 @@ StateSwap(State& state, int index1, int index2)
 
 // 初始化队列
 void
-LinkListInit(LinkList& q)
+LinkQueueInit(LinkQueue& q)
 {
     q = nullptr; // 初始化为空队列
 }
@@ -56,7 +56,7 @@ LinkListInit(LinkList& q)
 
 // 入队操作
 void
-LinkListPushTail(LinkList& list, Node_ptr new_node)
+LinkQueuePushTail(LinkQueue& list, Node_ptr new_node)
 {
     // 固定初始化为 nullptr
     new_node->next_list_node = nullptr;
@@ -83,7 +83,7 @@ LinkListPushTail(LinkList& list, Node_ptr new_node)
 
 // 出队操作
 Node_ptr
-LinkListPopHead(LinkList& list)
+LinkQueuePopHead(LinkQueue& list)
 {
     if(list == nullptr) return nullptr;
 
@@ -109,25 +109,9 @@ LinkListPopHead(LinkList& list)
 }
 
 
-Node_ptr
-LinkListContains(const LinkList& list, const State& state)
-{
-    Node_ptr current = list;
-    if(current == nullptr) return nullptr; // 如果队列为空，返回 nullptr
-    do
-    {
-        if(StateEqual(current->current_state, state)) return current; // 使用 StateEqual 检查状态是否相等
-        current = current->next_list_node;
-    } while(current != list);
-
-    // 如果遍历完队列都没有找到匹配的状态，返回 nullptr
-    return nullptr;
-}
-
-
 // 检查队列是否为空
 bool
-LinkListIsEmpty(const LinkList& q)
+LinkQueueIsEmpty(const LinkQueue& q)
 {
     return q == nullptr; // 如果队列为空，返回 true
 }
@@ -233,19 +217,19 @@ StateMapInsert(StateMap& map, const Node& node)
 
 // BFS + 路径恢复
 void
-BFS(const State& start_state, const State& target_state, StateMap& state_map, LinkList& path)
+BFS(const State& start_state, const State& target_state, StateMap& state_map, LinkQueue& path)
 {
-    LinkList node_queue;      // 队列用于 BFS
-    LinkListInit(node_queue); // 初始化队列
+    LinkQueue node_queue;      // 队列用于 BFS
+    LinkQueueInit(node_queue); // 初始化队列
 
     Node start_node;
     start_node.current_state = start_state;                           // 设置初始状态
     Node_ptr start_node_ptr  = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
-    LinkListPushTail(node_queue, start_node_ptr);                     // 将初始状态入队
-    while(!LinkListIsEmpty(node_queue))
+    LinkQueuePushTail(node_queue, start_node_ptr);                    // 将初始状态入队
+    while(!LinkQueueIsEmpty(node_queue))
     {
         // 当前状态出队
-        Node_ptr current_node = LinkListPopHead(node_queue);
+        Node_ptr current_node = LinkQueuePopHead(node_queue);
 
         // 如果当前状态是目标状态
         if(StateEqual(current_node->current_state, target_state))
@@ -254,7 +238,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
             Node_ptr path_node = current_node; // 从当前节点开始回溯路径
             while(path_node != nullptr)
             {
-                LinkListPushTail(path, path_node);                            // 将当前节点加入路径
+                LinkQueuePushTail(path, path_node);                           // 将当前节点加入路径
                 path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
             }
 
@@ -318,7 +302,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                     Node_ptr new_map_node = StateMapInsert(state_map, next_node);
 
                     // 将新状态入队
-                    LinkListPushTail(node_queue, new_map_node);
+                    LinkQueuePushTail(node_queue, new_map_node);
                 }
             }
         }
