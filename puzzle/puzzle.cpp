@@ -3,16 +3,56 @@
 
 #include "header.h"
 
+#include <stdio.h>
+
+
+// 设置 3x3 状态
+void
+StateSet(State& state, const char* str)
+{
+    for(int i = 0; i < 9; ++i) state.data[i] = str[i];
+}
 
 // 打印 3x3 状态
 void
-printState(const State& state)
+StatePrint(const State& state)
 {
     for(int i = 0; i < 9; ++i)
     {
-        printf("%c ", state[i]);
+        printf("%c ", state.data[i]);
         if(i % 3 == 2) printf("\n");
     }
+}
+
+// 检查两个状态是否相等
+bool
+StateEqual(const State& a, const State& b)
+{
+    for(int i = 0; i < 9; ++i)
+    {
+        if(a.data[i] != b.data[i]) return false; // 如果有任何一个字符不相等，返回 false
+    }
+    return true;                                 // 所有字符都相等，返回 true
+}
+
+// 查找状态中 '0' 的位置
+int
+StateFindZero(const State& state)
+{
+    for(int i = 0; i < 9; ++i)
+    {
+        if(state.data[i] == '0') return i; // 返回 '0' 的索引位置
+    }
+    return -1;                             // 如果没有找到 '0'，返回 -1
+}
+
+// 交换状态中两个位置的值
+void
+StateSwap(State& state, int index1, int index2)
+{
+    char temp          = state.data[index1]; // 临时变量存储 index1 的值
+    state.data[index1] = state.data[index2]; // 将 index2 的值赋给 index1
+    state.data[index2] = temp;               // 将临时变量的值赋给 index2
 }
 
 
@@ -94,7 +134,7 @@ LinkListContains(const LinkList& list, const State& state)
     if(current == nullptr) return nullptr; // 如果队列为空，返回 nullptr
     do
     {
-        if(current->current_state == state) return current; // 找到匹配的状态
+        if(StateEqual(current->current_state, state)) return current; // 使用 StateEqual 检查状态是否相等
         current = current->next_list_node;
     } while(current != list);
 
@@ -118,7 +158,7 @@ unsigned
 StateMapHash(const State& state, int m)
 {
     unsigned hash_value = 0;
-    for(char c : state)
+    for(char c : state.data)
     {
         hash_value = (hash_value * 31 + c) % m; // 使用简单的哈希函数
     }
@@ -174,8 +214,8 @@ StateMapSearch(const StateMap& map, const State& state)
     Node_ptr current = map.rcd[index];
     while(current)
     {
-        if(current->current_state == state) return current; // 找到匹配的状态
-        current = current->next_map_node;                   // 移动到下一个节点
+        if(StateEqual(current->current_state, state)) return current; // 找到匹配的状态
+        current = current->next_map_node;                             // 移动到下一个节点
     }
     // 如果遍历完链表都没有找到匹配的状态，返回 nullptr
     return nullptr;
@@ -195,7 +235,7 @@ StateMapInsert(StateMap& map, const Node& node)
     Node_ptr current = map.rcd[index];
     while(current)
     {
-        if(current->current_state == node.current_state) // 比较当前状态
+        if(StateEqual(current->current_state, node.current_state)) // 比较当前状态
         {
             found = true;
             break;
@@ -240,13 +280,13 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
         LinkListPopHead(node_queue, cur_node); // 当前状态出队
 
         // 如果当前状态是目标状态
-        if(cur_node.current_state == target_state)
+        if(StateEqual(cur_node.current_state, target_state))
         {
             printf("找到目标状态！\n");
 
             // 从目标状态向前回溯路径
             State s = cur_node.current_state;
-            while(s != start_state)
+            while(!StateEqual(s, start_state))
             {
                 Node_ptr state_info_node = StateMapSearch(state_map, s); // 查找当前状态的信息
                 LinkListPushTail(path, state_info_node);                 // 将当前状态加入路径
@@ -258,7 +298,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
         }
 
         // 获取当前状态中 '0' 的位置
-        int z = cur_node.current_state.find('0');
+        int z = StateFindZero(cur_node.current_state);
         int x = z % 3;
         int y = z / 3;
 
@@ -298,7 +338,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
 
                 // 生成新状态
                 State next_state = cur_node.current_state;
-                std::swap(next_state[z], next_state[nz]);
+                StateSwap(next_state, z, nz);
 
                 // 如果新状态未被访问过
                 if(!StateMapSearch(state_map, next_state))

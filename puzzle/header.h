@@ -4,10 +4,13 @@
 #ifndef PUZZLE_HEADER_H
 #define PUZZLE_HEADER_H
 
-#include <string>
 
+// 3x3 状态数组
+struct State
+{
+    char data[9] = { 0 }; // 3x3 状态数组
+};
 
-typedef std::string State; // 定义一个状态数组为字符串类型，方便处理
 
 // 定义操作方向的枚举类型
 enum Operate
@@ -22,17 +25,17 @@ enum Operate
 // 节点
 typedef struct Node
 {
-    int deep = 0;                          // 最小步数
+    int deep = 0;                    // 最小步数
 
-    State   current_state = "";            // 当前状态
-    State   last_state    = "";            // 上一个状态
-    Operate operate       = Operate::NONE; // 操作（移动方向）
+    State   current_state;           // 当前状态
+    State   last_state;              // 上一个状态
+    Operate operate = Operate::NONE; // 操作（移动方向）
 
-    Node* last_list_node = nullptr;        // 指向上一个队列节点
-    Node* next_list_node = nullptr;        // 指向下一个队列节点
+    Node* last_list_node = nullptr;  // 指向上一个队列节点
+    Node* next_list_node = nullptr;  // 指向下一个队列节点
 
-    Node* last_map_node = nullptr;         // 指向上一个哈希表节点
-    Node* next_map_node = nullptr;         // 指向下一个哈希表节点
+    Node* last_map_node = nullptr;   // 指向上一个哈希表节点
+    Node* next_map_node = nullptr;   // 指向下一个哈希表节点
 
 } Node, *Node_ptr, *LinkList, **MapListList;
 
@@ -51,7 +54,13 @@ struct StateMap
 
 // 函数声明
 
-void printState(const State& state);
+// 状态相关
+
+void StateSet(State& state, const char* str);
+void StatePrint(const State& state);
+bool StateEqual(const State& a, const State& b);      // 检查两个状态是否相等
+int  StateFindZero(const State& state);               // 查找状态中 '0' 的位置
+void StateSwap(State& state, int index1, int index2); // 交换状态中两个位置的值
 
 // 链式队列相关函数声明
 

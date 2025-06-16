@@ -3,13 +3,21 @@
 
 #include "header.h"
 
+#include <stdio.h>
+
 int
 main(int argc, char* argv[])
 {
-    State start  = "213540786";
-    State target = "123456780"; // 目标状态
-    printf("初始状态为: %s\n", start.c_str());
-    printf("目标状态为: %s\n", target.c_str());
+    // State start  = "213540786";
+    // State target = "123456780"; // 目标状态
+
+
+    State start;
+    State target;
+    StateSet(start, "213540786");  // 初始状态
+    StateSet(target, "123456780"); // 目标状态
+    printf("初始状态为: %s\n", start.data);
+    printf("目标状态为: %s\n", target.data);
 
     // if(argc > 1)
     // {
@@ -57,7 +65,7 @@ main(int argc, char* argv[])
             current = current->last_list_node; // 向前移动到上一个节点
 
             printf("移动%d次：\n", count);
-            printState(current->current_state);
+            StatePrint(current->current_state);
 
             printf("上一个操作：\n");
             Operate dir = current->operate;
