@@ -101,7 +101,8 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
 int
 main(int argc, char* argv[])
 {
-    int      deep = -1;
+    printf("3x3 拼图求解器\n");
+
     State    start_state;
     State    target_state;
     LinkList path;
@@ -126,7 +127,7 @@ main(int argc, char* argv[])
         printf("开始 BFS 搜索...\n");
         clock_t start_time = clock(); // 记录开始时间
 
-        deep = BFS(start_state, target_state, state_map, path);
+        BFS(start_state, target_state, state_map, path);
 
         clock_t end_time     = clock();                                                     // 记录结束时间
         double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
@@ -135,10 +136,10 @@ main(int argc, char* argv[])
 
     // 处理结果
     {
-        if(deep == -1) printf("无法达到目标状态\n");
+        if(path == nullptr) printf("无法达到目标状态\n");
         else
         {
-            printf("最少步数为: %d\n\n", deep);
+            printf("最少步数为: %d\n\n", path->deep);
             SavePathToFile(path, "path.txt");      // 保存路径到文件
         }
         SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件

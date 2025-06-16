@@ -252,7 +252,7 @@ StateMapInsert(StateMap& map, const Node& node)
 
 
 // BFS + 路径恢复
-int
+void
 BFS(const State& start_state, const State& target_state, StateMap& state_map, LinkList& path)
 {
     LinkList node_queue;      // 队列用于 BFS
@@ -284,7 +284,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
             }
             LinkListPushTail(path, start_node_ptr);                      // 将初始状态加入路径
 
-            return cur_node.deep;                                        // 返回最小步数
+            break;
         }
 
         // 获取当前状态中 '0' 的位置
@@ -349,6 +349,4 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
             }
         }
     }
-
-    return -1; // 无法到达
 }
