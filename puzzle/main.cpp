@@ -6,8 +6,8 @@
 int
 main(int argc, char* argv[])
 {
-    StateArray start  = "213540786";
-    StateArray target = "123456780"; // 目标状态
+    State start  = "213540786";
+    State target = "123456780"; // 目标状态
     printf("初始状态为: %s\n", start.c_str());
     printf("目标状态为: %s\n", target.c_str());
 
@@ -50,11 +50,11 @@ main(int argc, char* argv[])
         }
 
         // 从循环队尾开始打印路径
-        int           count   = 0;
-        LinkListNode* current = path;
+        int   count   = 0;
+        Node* current = path;
         do
         {
-            current = current->last_node; // 向前移动到上一个节点
+            current = current->last_list_node; // 向前移动到上一个节点
 
             printf("移动%d次：\n", count);
             printState(current->current_state);
