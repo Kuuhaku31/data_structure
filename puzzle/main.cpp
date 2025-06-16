@@ -11,8 +11,6 @@
 void
 SavePathToFile(const LinkList& path, const char* filename)
 {
-    if(path == nullptr) return;
-
     FILE* file = fopen(filename, "w");
     if(!file)
     {

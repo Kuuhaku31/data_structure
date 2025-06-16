@@ -3,8 +3,6 @@
 
 #include "header.h"
 
-#include <stdio.h>
-
 
 // 设置 3x3 状态
 void
@@ -252,17 +250,13 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
         // 如果当前状态是目标状态
         if(StateEqual(current_node->current_state, target_state))
         {
-            printf("找到目标状态，最小步数: %d\n", current_node->deep);
-
             // 从目标状态向前回溯路径
-            State state = current_node->current_state;
-            while(!StateEqual(state, start_state))
+            Node_ptr path_node = current_node; // 从当前节点开始回溯路径
+            while(path_node != nullptr)
             {
-                Node_ptr state_info_node = StateMapSearch(state_map, state); // 查找当前状态的信息
-                LinkListPushTail(path, state_info_node);                     // 将当前状态加入路径
-                state = state_info_node->last_state;                         // 复制上一个状态
+                LinkListPushTail(path, path_node);                            // 将当前节点加入路径
+                path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
             }
-            LinkListPushTail(path, start_node_ptr);                          // 将初始状态加入路径
 
             break;
         }
