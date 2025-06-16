@@ -22,10 +22,12 @@ ShortestPath_DIJ(MGraph G, int v0, int dist[], int path[])
     dist[v0]    = 0;                 // 起点到自身的距离为0
     visited[v0] = 1;                 // 标记起点已访问
 
+    // 从起点开始，逐步找到最短路径
+    // 迭代G.vexnum - 1次，因为起点已经访问过
     for(int i = 1; i < G.vexnum; i++)
     {
         int min_dist = INFINITY;
-        int u        = -1;
+        int u        = -1; //
 
         // 找到未访问的顶点中距离起点最近的顶点
         for(int j = 0; j < G.vexnum; j++)
@@ -67,19 +69,21 @@ main()
     int dist[MAX_VERTEX_NUM]; // 存储最短路径长度
     int path[MAX_VERTEX_NUM]; // 存储最短路径
 
-    int start_vertex = 0;     // 假设从顶点0开始计算最短路径
+    int start_vertex = 6;     // 假设从顶点0开始计算最短路径
     ShortestPath_DIJ(G, start_vertex, dist, path);
 
     // 输出结果
     for(int i = 0; i < G.vexnum; i++)
     {
         printf("从%s到%s的最短路径长度为: %d，路径为: ", G.vexs[start_vertex], G.vexs[i], dist[i]);
+        printf("%s ", G.vexs[start_vertex]);
         int p = path[i];
         while(p != -1)
         {
-            printf("%d ", p);
+            printf("%s ", G.vexs[p]);
             p = path[p];
         }
+        printf("%s ", G.vexs[i]);
         printf("\n");
     }
 

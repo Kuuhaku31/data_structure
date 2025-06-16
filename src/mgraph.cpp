@@ -167,12 +167,14 @@ Display(MGraph G)
     default: break;
     }
 
-    printf("%d个顶点%d条边。顶点依次是: ", G.vexnum, G.arc_count);
-    for(int i = 0; i < G.vexnum; i++) printf("%s ", G.vexs[i]);
+    printf("%d个顶点%d条边", G.vexnum, G.arc_count);
 
-    printf("\n图的邻接矩阵:\n");
+    printf("\n图的邻接矩阵:\n\t");
+    for(int i = 0; i < G.vexnum; i++) printf("%s\t", G.vexs[i]);
+    printf("\n");
     for(int i = 0; i < G.vexnum; i++)
     {
+        printf("%s\t", G.vexs[i]);
         for(int j = 0; j < G.vexnum; j++)
         {
             if(G.arcs[i][j].adj == INFINITY)
