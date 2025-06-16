@@ -100,37 +100,21 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
     fclose(file);
 }
 
+// puzzle.exe < 初始状态 > < 目标状态（默认为 123456780） >
 int
 main(int argc, char* argv[])
 {
-    // State start  = "213540786";
-    // State target = "123456780"; // 目标状态
-
-
     State start;
     State target;
-    StateSet(start, "826015473");  // 初始状态
-    StateSet(target, "123456780"); // 目标状态
-    printf("初始状态为:\n");
-    StatePrint(start);
-    printf("目标状态为:\n");
-    StatePrint(target);
 
-    // if(argc > 1)
-    // {
-    //     start = argv[1]; // 从命令行参数获取初始状态
-    //     printf("初始状态为: %s\n", start.c_str());
-    // }
-    // else
-    // {
-    //     printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
-    //     for(int i = 0; i < 9; ++i)
-    //     {
-    //         char ch;
-    //         scanf(" %c", &ch);
-    //         start += ch;
-    //     }
-    // }
+    if(argc < 2)
+    {
+        printf("请提供初始状态字符串（例如: 123456780）\n");
+        return 1;
+    }
+    StateSet(start, argv[1]);                   // 设置初始状态
+    if(argc < 3) StateSet(target, "123456780"); // 设置默认目标状态
+    else StateSet(target, argv[2]);             // 设置目标状态
 
     LinkList path;
     StateMap state_map;
