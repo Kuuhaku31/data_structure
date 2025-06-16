@@ -5,6 +5,97 @@
 
 #include <stdio.h>
 
+// 保存解法到文件
+void
+SavePathToFile(const LinkList& path, const char* filename)
+{
+    FILE* file = fopen(filename, "w");
+    if(!file)
+    {
+        printf("无法打开文件 %s 进行写入。\n", filename);
+        return;
+    }
+
+    // 处理循环队列
+    if(path == nullptr)
+    {
+        fprintf(file, "路径为空。\n");
+    }
+    else
+    {
+        // 从循环队尾开始打印路径
+        int   count   = 0;
+        Node* current = path;
+        do
+        {
+            current = current->last_list_node; // 向前移动到上一个节点
+
+            // 将当前状态写入文件
+            for(int i = 0; i < 9; ++i)
+            {
+                fprintf(file, "%c", current->current_state.data[i]);
+                if(i % 3 == 2) fprintf(file, "\n"); // 每三列换行
+            }
+
+            fprintf(file, "操作: ");
+            Operate dir = current->operate;
+            switch(dir)
+            {
+            case Operate::UP:
+                fprintf(file, "向下划动\n");
+                break;
+            case Operate::RIGHT:
+                fprintf(file, "向左划动\n");
+                break;
+            case Operate::DOWN:
+                fprintf(file, "向上划动\n");
+                break;
+            case Operate::LEFT:
+                fprintf(file, "向右划动\n");
+                break;
+            case Operate::NONE:
+                fprintf(file, "无操作\n");
+                break;
+            }
+
+            fprintf(file, "\n");
+
+            count++;
+        } while(current != path); // 循环队列
+    }
+
+    fclose(file);
+}
+
+// 保存状态映射到文件
+void
+SaveMapToFile(const StateMap& state_map, const char* filename)
+{
+    FILE* file = fopen(filename, "w");
+    if(!file)
+    {
+        printf("无法打开文件 %s 进行写入。\n", filename);
+        return;
+    }
+    for(int i = 0; i < HASH_SIZE; ++i)
+    {
+        fprintf(file, "哈希桶[%04d] -> ", i);
+
+        // 打印链表
+        Node_ptr current = state_map[i];
+        while(current)
+        {
+            for(int j = 0; j < 9; ++j) fprintf(file, "%c", current->current_state.data[j]);
+            fprintf(file, " -> ");
+            current = current->next_map_node; // 移动到下一个节点
+        }
+
+        fprintf(file, "NULL\n");
+    }
+
+    fclose(file);
+}
+
 int
 main(int argc, char* argv[])
 {
@@ -50,50 +141,8 @@ main(int argc, char* argv[])
     }
     else
     {
-        printf("路径为:\n");
         printf("最少步数为: %d\n\n", steps);
-
-        if(LinkListIsEmpty(path))
-        {
-            printf("路径为空。\n");
-            return 0;
-        }
-
-        // 从循环队尾开始打印路径
-        int   count   = 0;
-        Node* current = path;
-        do
-        {
-            current = current->last_list_node; // 向前移动到上一个节点
-
-            printf("移动%d次：\n", count);
-            StatePrint(current->current_state);
-
-            printf("上一个操作：\n");
-            Operate dir = current->operate;
-            switch(dir)
-            {
-            case Operate::UP:
-                printf("向下划动\n");
-                break;
-            case Operate::RIGHT:
-                printf("向左划动\n");
-                break;
-            case Operate::DOWN:
-                printf("向上划动\n");
-                break;
-            case Operate::LEFT:
-                printf("向右划动\n");
-                break;
-            case Operate::NONE:
-                printf("无操作\n");
-                break;
-            }
-
-            printf("\n");
-
-            count++;
-        } while(current != path); // 循环队列
+        SavePathToFile(path, "path.txt"); // 保存路径到文件
     }
 
     // 销毁状态映射

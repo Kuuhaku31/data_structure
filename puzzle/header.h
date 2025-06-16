@@ -5,7 +5,7 @@
 #define PUZZLE_HEADER_H
 
 
-#define HASH_SIZE 9973 // 哈希表的大小，使用一个较大的质数作为容量
+#define HASH_SIZE 67631 // 哈希表的大小，使用一个较大的质数作为容量
 
 
 // 3x3 状态数组
