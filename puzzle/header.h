@@ -46,8 +46,7 @@ typedef struct Node
 // 哈希表
 struct StateMap
 {
-    MapListList rcd; // （指向指针的指针）存放指针的数组
-    int         m;   // 除求余数，通过 m 计算哈希值
+    LinkList rcd[HASH_SIZE] = { nullptr }; // 哈希表的记录，使用链式存储
 };
 
 
@@ -72,11 +71,11 @@ Node_ptr LinkListContains(const LinkList& list, const State& state); // 检查�
 
 // 哈希表相关函数声明
 
-void     StateMapInit(StateMap& map, int size);                   // 初始化状态映射
+void     StateMapInit(StateMap& map);                             // 初始化状态映射
 void     StateMapDestroy(StateMap& map);                          // 销毁状态映射
 Node_ptr StateMapSearch(const StateMap& map, const State& state); // 查找状态
 Node_ptr StateMapInsert(StateMap& map, const Node& node);         // 插入状态，返回新节点指针
-unsigned StateMapHash(const State& state, int m);                 // 哈希函数
+unsigned StateMapHash(const State& state);                        // 哈希函数
 
 
 /*

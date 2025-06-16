@@ -155,12 +155,12 @@ LinkListIsEmpty(const LinkList& q)
 
 // 计算状态的哈希值
 unsigned
-StateMapHash(const State& state, int m)
+StateMapHash(const State& state)
 {
     unsigned hash_value = 0;
     for(char c : state.data)
     {
-        hash_value = (hash_value * 31 + c) % m; // 使用简单的哈希函数
+        hash_value = (hash_value * 31 + c) % HASH_SIZE; // 使用简单的哈希函数
     }
     return hash_value;
 }
@@ -168,13 +168,11 @@ StateMapHash(const State& state, int m)
 
 // 初始化状态映射
 void
-StateMapInit(StateMap& map, int size)
+StateMapInit(StateMap& map)
 {
-    map.m = size; // 设置除数 m
-
     // 分配指针数组内存
-    map.rcd = new Node_ptr[size];
-    for(int i = 0; i < size; ++i)
+    // map.rcd = new Node_ptr[HASH_SIZE];
+    for(int i = 0; i < HASH_SIZE; ++i)
     {
         map.rcd[i] = nullptr; // 初始化每个指针为 nullptr
     }
@@ -206,7 +204,7 @@ StateMapDestroy(StateMap& map)
 Node_ptr
 StateMapSearch(const StateMap& map, const State& state)
 {
-    unsigned index = StateMapHash(state, map.m); // 计算哈希值
+    unsigned index = StateMapHash(state); // 计算哈希值
 
     // 遍历链表查找状态
     Node_ptr current = map.rcd[index];
@@ -225,7 +223,7 @@ StateMapSearch(const StateMap& map, const State& state)
 Node_ptr
 StateMapInsert(StateMap& map, const Node& node)
 {
-    unsigned index = StateMapHash(node.current_state, map.m); // 计算哈希值
+    unsigned index = StateMapHash(node.current_state); // 计算哈希值
 
     // 检查是否已存在相同状态
     // 如果已存在相同状态，直接返回

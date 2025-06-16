@@ -39,8 +39,8 @@ main(int argc, char* argv[])
 
     LinkList path;
     StateMap state_map;
-    LinkListInit(path);                 // 初始化路径队列
-    StateMapInit(state_map, HASH_SIZE); // 初始化状态映射
+    LinkListInit(path);      // 初始化路径队列
+    StateMapInit(state_map); // 初始化状态映射
 
     int steps = BFS(start, target, state_map, path);
 
@@ -95,6 +95,9 @@ main(int argc, char* argv[])
             count++;
         } while(current != path); // 循环队列
     }
+
+    // 销毁状态映射
+    StateMapDestroy(state_map);
 
     return 0;
 }
