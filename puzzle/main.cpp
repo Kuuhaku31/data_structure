@@ -6,23 +6,23 @@
 int
 main(int argc, char* argv[])
 {
-    StateArray start;
+    StateArray start = "213540786";
 
-    if(argc > 1)
-    {
-        start = argv[1]; // 从命令行参数获取初始状态
-        printf("初始状态为: %s\n", start.c_str());
-    }
-    else
-    {
-        printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
-        for(int i = 0; i < 9; ++i)
-        {
-            char ch;
-            scanf(" %c", &ch);
-            start += ch;
-        }
-    }
+    // if(argc > 1)
+    // {
+    //     start = argv[1]; // 从命令行参数获取初始状态
+    //     printf("初始状态为: %s\n", start.c_str());
+    // }
+    // else
+    // {
+    //     printf("请输入初始状态（0 表示空格，按行输入共 9 个数字）:\n");
+    //     for(int i = 0; i < 9; ++i)
+    //     {
+    //         char ch;
+    //         scanf(" %c", &ch);
+    //         start += ch;
+    //     }
+    // }
 
     LinkList path;
     LinkListInit(path);              // 初始化路径队列
