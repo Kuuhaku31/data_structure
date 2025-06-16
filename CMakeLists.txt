@@ -34,7 +34,8 @@ add_executable(${PROJECT_NAME}
 project(hash)
 add_executable(${PROJECT_NAME}
 
-    "./src/hashlink.cpp"
+    "./ignore/main.cpp"
+    "./src/linkhash.cpp"
 )
 
 # dij
