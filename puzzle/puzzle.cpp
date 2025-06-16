@@ -3,6 +3,8 @@
 
 #include "header.h"
 
+#include <stdio.h>
+
 
 // 设置 3x3 状态
 void
@@ -82,38 +84,30 @@ LinkListPushTail(LinkList& list, Node_ptr new_node)
 
 
 // 出队操作
-void
-LinkListPopHead(LinkList& list, Node& dst_node)
+Node_ptr
+LinkListPopHead(LinkList& list)
 {
-    if(list == nullptr) return;
+    if(list == nullptr) return nullptr;
 
-    Node_ptr front_node     = list;
-    dst_node.deep           = front_node->deep;
-    dst_node.current_state  = front_node->current_state;
-    dst_node.last_state     = front_node->last_state;
-    dst_node.operate        = front_node->operate;
-    dst_node.next_list_node = front_node->next_list_node;
-    dst_node.last_list_node = front_node->last_list_node;
+    Node_ptr front_node = list;
 
-    // 只有一个节点
+    // 如果队列只有一个节点，直接清空队列
     if(list->next_list_node == list)
     {
-        // delete front_node;
         list = nullptr;
     }
-    // 有多个节点
+    // 如果队列有多个节点
     else
     {
-        Node_ptr tail        = list->last_list_node;
-        Node_ptr next        = list->next_list_node;
-        tail->next_list_node = next;
-        next->last_list_node = tail;
-        list                 = next;
-
-        // delete front_node;
-        front_node->next_list_node = nullptr; // 清空前驱指针
-        front_node->last_list_node = nullptr; // 清空后继指针
+        list                                       = list->next_list_node;       // 更新队头后移
+        list->last_list_node                       = front_node->last_list_node; // 更新队头的上一个节点指针
+        front_node->last_list_node->next_list_node = list;                       // 更新队尾指针
     }
+
+    front_node->next_list_node = nullptr;
+    front_node->last_list_node = nullptr;
+
+    return front_node;
 }
 
 
@@ -253,14 +247,15 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
     while(!LinkListIsEmpty(node_queue))
     {
         // 当前状态出队
-        Node current_node;
-        LinkListPopHead(node_queue, current_node);
+        Node_ptr current_node = LinkListPopHead(node_queue);
 
         // 如果当前状态是目标状态
-        if(StateEqual(current_node.current_state, target_state))
+        if(StateEqual(current_node->current_state, target_state))
         {
+            printf("找到目标状态，最小步数: %d\n", current_node->deep);
+
             // 从目标状态向前回溯路径
-            State state = current_node.current_state;
+            State state = current_node->current_state;
             while(!StateEqual(state, start_state))
             {
                 Node_ptr state_info_node = StateMapSearch(state_map, state); // 查找当前状态的信息
@@ -273,7 +268,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
         }
 
         // 获取当前状态中 '0' 的位置
-        int z = StateFindZero(current_node.current_state);
+        int z = StateFindZero(current_node->current_state);
         int x = z % 3;
         int y = z / 3;
 
@@ -312,7 +307,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                 int nz = ny * 3 + nx;
 
                 // 生成新状态
-                State next_state = current_node.current_state;
+                State next_state = current_node->current_state;
                 StateSwap(next_state, z, nz);
 
                 // 如果新状态未被访问过
@@ -320,10 +315,10 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                 {
                     // 创建新节点并设置状态
                     Node next_node;
-                    next_node.deep          = current_node.deep + 1;      // 更新步数
-                    next_node.current_state = next_state;                 // 更新新状态
-                    next_node.last_state    = current_node.current_state; // 记录上一个状态
-                    next_node.operate       = dir;                        // 记录操作方向
+                    next_node.deep          = current_node->deep + 1;      // 更新步数
+                    next_node.current_state = next_state;                  // 更新新状态
+                    next_node.last_state    = current_node->current_state; // 记录上一个状态
+                    next_node.operate       = dir;                         // 记录操作方向
 
                     // 插入新状态到哈希表
                     Node_ptr new_map_node = StateMapInsert(state_map, next_node);

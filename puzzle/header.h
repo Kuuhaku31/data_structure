@@ -54,7 +54,7 @@ int      StateFindZero(const State& state);                                     
 void     StateSwap(State& state, int index1, int index2);                               // 交换状态中两个位置的值
 void     LinkListInit(LinkList& list);                                                  // 初始化队列
 void     LinkListPushTail(LinkList& list, Node_ptr res_node);                           // 入队操作
-void     LinkListPopHead(LinkList& list, Node& dst_node);                               // 出队操作
+Node_ptr LinkListPopHead(LinkList& list);                                               // 出队操作
 bool     LinkListIsEmpty(const LinkList& list);                                         // 检查队列是否为空
 Node_ptr LinkListContains(const LinkList& list, const State& state);                    // 检查队列是否包含某个状态
 void     StateMapInit(StateMap& map);                                                   // 初始化状态映射
