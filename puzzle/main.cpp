@@ -16,8 +16,10 @@ main(int argc, char* argv[])
     State target;
     StateSet(start, "213540786");  // 初始状态
     StateSet(target, "123456780"); // 目标状态
-    printf("初始状态为: %s\n", start.data);
-    printf("目标状态为: %s\n", target.data);
+    printf("初始状态为:\n");
+    StatePrint(start);
+    printf("目标状态为:\n");
+    StatePrint(target);
 
     // if(argc > 1)
     // {
@@ -37,8 +39,8 @@ main(int argc, char* argv[])
 
     LinkList path;
     StateMap state_map;
-    LinkListInit(path);            // 初始化路径队列
-    StateMapInit(state_map, 9973); // 初始化状态映射，容量为 9973，一个较大的质数，适合用作哈希表的容量
+    LinkListInit(path);                 // 初始化路径队列
+    StateMapInit(state_map, HASH_SIZE); // 初始化状态映射
 
     int steps = BFS(start, target, state_map, path);
 

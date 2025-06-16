@@ -5,6 +5,9 @@
 #define PUZZLE_HEADER_H
 
 
+#define HASH_SIZE 9973 // 哈希表的大小，使用一个较大的质数作为容量
+
+
 // 3x3 状态数组
 struct State
 {
@@ -44,11 +47,7 @@ typedef struct Node
 struct StateMap
 {
     MapListList rcd; // （指向指针的指针）存放指针的数组
-
-    int size;        // 哈希表的容量
-    int count;       // 当前表中含有的记录个数
-
-    int m;           // 除求余数，通过 m 计算哈希值
+    int         m;   // 除求余数，通过 m 计算哈希值
 };
 
 

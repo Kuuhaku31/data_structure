@@ -170,9 +170,7 @@ StateMapHash(const State& state, int m)
 void
 StateMapInit(StateMap& map, int size)
 {
-    map.size  = size; // 设置哈希表的容量
-    map.count = 0;    // 初始化记录个数为 0
-    map.m     = size; // 设置除数 m
+    map.m = size; // 设置除数 m
 
     // 分配指针数组内存
     map.rcd = new Node_ptr[size];
@@ -190,7 +188,7 @@ StateMapDestroy(StateMap& map)
     if(!map.rcd) return; // 如果指针数组为空，直接返回
 
     // 遍历每个链表，释放节点内存
-    for(int i = 0; i < map.size; ++i)
+    for(int i = 0; i < HASH_SIZE; ++i)
     {
         Node_ptr temp    = nullptr;
         Node_ptr current = map.rcd[i];
@@ -252,7 +250,6 @@ StateMapInsert(StateMap& map, const Node& node)
     // 将新节点插入到哈希表中
     new_node->next_map_node = map.rcd[index]; // 新节点指向当前链表头
     map.rcd[index]          = new_node;       // 更新链表头为新节点
-    map.count++;                              // 增加记录个数
 
     // 返回新节点指针
     return new_node;
