@@ -65,4 +65,18 @@ unsigned StateMapHash(const State& state);                                      
 void BFS(const State& start, const State& target, StateMap& state_map, LinkQueue& path); // 广度优先搜索
 
 
+/* Build Tree */
+
+/*
+### 构建状态树
+使用广度优先搜索（BFS）算法从起始状态（1234567890）到所有可能的目标状态
+参数：
+  - `start`: 起始状态
+  - `state_map`: 状态映射，用于存储已访问的状态
+  - `leafs`: 用于存储所有叶子节点（目标状态）
+    - `node_count`: 用于记录节点总数
+*/
+void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count);
+
+
 #endif // PUZZLE_HEADER_H

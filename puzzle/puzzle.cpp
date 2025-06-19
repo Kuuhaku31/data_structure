@@ -308,3 +308,113 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
         }
     }
 }
+
+
+void
+BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count)
+{
+    LinkQueue node_queue;      // 队列用于 BFS
+    LinkQueueInit(node_queue); // 初始化队列
+
+    Node start_node;
+    start_node.current_state = start_state;                           // 设置初始状态
+    Node_ptr start_node_ptr  = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
+    node_count++;                                                     // 统计节点数量
+    LinkQueuePushTail(node_queue, start_node_ptr);                    // 将初始状态入队
+    while(!LinkQueueIsEmpty(node_queue))
+    {
+        // 当前状态出队
+        Node_ptr current_node = LinkQueuePopHead(node_queue);
+
+        // // 如果当前状态是目标状态
+        // if(StateEqual(current_node->current_state, target_state))
+        // {
+        //     // 从目标状态向前回溯路径
+        //     Node_ptr path_node = current_node; // 从当前节点开始回溯路径
+        //     while(path_node != nullptr)
+        //     {
+        //         LinkQueuePushTail(path, path_node);                           // 将当前节点加入路径
+        //         path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
+        //     }
+
+        //     break;
+        // }
+
+        // 获取当前状态中 '0' 的位置
+        int z = StateFindZero(current_node->current_state);
+        int x = z % 3;
+        int y = z / 3;
+
+        // 尝试四个方向移动 '0'
+        bool is_leaf = true; // 标记是否为叶子节点
+        for(int i = 0; i < 4; ++i)
+        {
+            Operate dir = static_cast<Operate>(i);
+
+            int nx = 0;
+            int ny = 0;
+
+            switch(dir)
+            {
+            case Operate::UP:
+                nx = x;
+                ny = y - 1; // 向上移动
+                break;
+            case Operate::RIGHT:
+                nx = x + 1; // 向右移动
+                ny = y;
+                break;
+            case Operate::DOWN:
+                nx = x;
+                ny = y + 1; // 向下移动
+                break;
+            case Operate::LEFT:
+                nx = x - 1; // 向左移动
+                ny = y;
+                break;
+            }
+
+            // 检查新位置是否在 3x3 网格内
+            if(nx >= 0 && nx < 3 && ny >= 0 && ny < 3)
+            {
+                // 新位置的索引
+                int nz = ny * 3 + nx;
+
+                // 生成新状态
+                State next_state = current_node->current_state;
+                StateSwap(next_state, z, nz);
+
+                // 如果新状态未被访问过
+                if(!StateMapSearch(state_map, next_state))
+                {
+                    // 创建新节点并设置状态
+                    Node next_node;
+                    next_node.deep          = current_node->deep + 1;      // 更新步数
+                    next_node.current_state = next_state;                  // 更新新状态
+                    next_node.last_state    = current_node->current_state; // 记录上一个状态
+                    next_node.operate       = dir;                         // 记录操作方向
+
+                    // 插入新状态到哈希表
+                    Node_ptr new_map_node = StateMapInsert(state_map, next_node);
+                    node_count++; // 统计节点数量
+
+                    // 将新状态入队
+                    LinkQueuePushTail(node_queue, new_map_node);
+
+                    is_leaf = false; // 只要有一个子节点，就不是叶子节点
+                }
+            }
+        }
+
+        // 如果当前节点没有子节点，则将其视为叶子节点
+        if(is_leaf)
+        {
+            // 将当前节点添加到叶子节点队列
+            LinkQueuePushTail(leafs, current_node);
+            leaf_count++; // 统计叶子节点数量
+        }
+    }
+
+    // BFS 完成后，node_queue 中的节点已全部处理完毕
+    // leafs 中包含所有叶子节点，state_map 中包含所有访问过的
+}
