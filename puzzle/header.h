@@ -29,7 +29,7 @@ enum Operate
     ZERO_NONE  = 4,
 };
 
-Operate operate(int dir);
+Operate int_to_operate(int dir);
 
 // 节点结构体
 struct Node
@@ -49,6 +49,7 @@ struct Node
 
 
 /* 函数声明 */
+void     NodeCopy(Node& dest, const Node& src);                                          // 复制节点
 void     StateCopy(State& dest, const State& src);                                       // 复制状态
 void     StateSet(State& state, const char* str);                                        // 设置状态
 bool     StateEqual(const State& a, const State& b);                                     // 检查两个状态是否相等
@@ -79,6 +80,11 @@ void BFS(const State& start, const State& target, StateMap& state_map, LinkQueue
     - `node_count`: 用于记录节点总数
 */
 void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count);
+
+// 尝试插入状态
+// 如果状态已存在，则返回 false
+// 否则插入新状态并返回 true，并且把新节点指针赋值给 node_ptr
+bool StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state);
 
 
 #endif // PUZZLE_HEADER_H

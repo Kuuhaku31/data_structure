@@ -5,7 +5,7 @@
 
 
 Operate
-operate(int dir)
+int_to_operate(int dir)
 {
     switch(dir)
     {
@@ -16,6 +16,23 @@ operate(int dir)
     default: return Operate::ZERO_NONE; // 默认返回 NONE
     }
 }
+
+
+void
+NodeCopy(Node& dest, const Node& src)
+{
+    dest.deep = src.deep;
+    StateCopy(dest.current_state, src.current_state);
+    StateCopy(dest.last_state, src.last_state);
+    dest.operate = src.operate;
+
+    dest.last_list_node = src.last_list_node; // 复制队列指针
+    dest.next_list_node = src.next_list_node; // 复制队列指针
+
+    dest.last_map_node = src.last_map_node;   // 复制哈希表指针
+    dest.next_map_node = src.next_map_node;   // 复制哈希表指针
+}
+
 
 void
 StateCopy(State& dest, const State& src)
@@ -329,8 +346,38 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
 }
 
 
+bool
+StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state)
+{
+    unsigned index = StateMapHash(state); // 计算哈希值
+
+    // 检查是否已存在相同状态
+    // 如果已存在相同状态，直接返回
+    bool found = false;
+    node_ptr   = map[index];
+    while(node_ptr)
+    {
+        if(StateEqual(node_ptr->current_state, state)) // 比较当前状态
+        {
+            found = true;
+            break;
+        }
+        node_ptr = node_ptr->next_map_node;
+    }
+    if(found) return false; // 如果已存在相同状态，返回 false
+    else                    // 如果不存在相同状态，则创建新节点并插入到哈希表中
+    {
+        node_ptr                = new Node;
+        node_ptr->next_map_node = map[index]; // 新节点指向当前链表头
+        map[index]              = node_ptr;   // 更新链表头为新节点
+
+        return true;
+    }
+}
+
+
 static inline bool
-_creat_new_state(const State& current_state, State& new_state, Operate dir)
+_create_new_state(const State& current_state, State& new_state, Operate dir)
 {
     // 计算 '0' 的位置
     // 获取当前状态中 '0' 的位置
@@ -369,8 +416,6 @@ _creat_new_state(const State& current_state, State& new_state, Operate dir)
     }
     else return false;
 }
-
-
 void
 BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count)
 {
@@ -394,28 +439,26 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
         int y = z / 3;
 
         // 尝试四个方向移动 '0'
-        bool  is_leaf = true; // 标记是否为叶子节点
-        State next_state;     // 用于存储新状态
+        bool     is_leaf = true; // 标记是否为叶子节点
+        State    next_state;     // 用于存储新状态
+        Node_ptr new_map_node = nullptr;
         for(int i = 0; i < 4; ++i)
         {
-            Operate dir = operate(i);
+            Operate dir = int_to_operate(i);
 
             // 如果无法创建新状态
-            if(!_creat_new_state(current_node->current_state, next_state, dir)) continue;
+            if(!_create_new_state(current_node->current_state, next_state, dir)) continue;
 
             // 如果新状态未被访问过
-            if(!StateMapSearch(state_map, next_state))
+            if(StateMapInsert(state_map, new_map_node, next_state))
             {
                 // 创建新节点并设置状态
-                Node next_node;
-                next_node.deep          = current_node->deep + 1;      // 更新步数
-                next_node.current_state = next_state;                  // 更新新状态
-                next_node.last_state    = current_node->current_state; // 记录上一个状态
-                next_node.operate       = dir;                         // 记录操作方向
+                new_map_node->deep          = current_node->deep + 1;      // 更新步数
+                new_map_node->current_state = next_state;                  // 更新新状态
+                new_map_node->last_state    = current_node->current_state; // 记录上一个状态
+                new_map_node->operate       = dir;                         // 记录操作方向
 
-                // 插入新状态到哈希表
-                Node_ptr new_map_node = StateMapInsert(state_map, next_node);
-                node_count++; // 统计节点数量
+                node_count++;                                              // 统计节点数量
 
                 // 将新状态入队
                 LinkQueuePushTail(node_queue, new_map_node);
