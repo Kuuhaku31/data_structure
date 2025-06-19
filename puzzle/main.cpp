@@ -121,47 +121,69 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
 
         current = current->last; // 向前移动到上一个节点
     } while(current != leafs_queue); // 循环队列
+
+    printf("叶子节点信息已保存到 %s\n", filename);
+    fclose(file);
 }
 
 
-// puzzle.exe < 初始状态 > < 目标状态（默认为 123456780） >
+// puzzle.exe < 根状态 > < 目标状态 >
 int
 main(int argc, char* argv[])
 {
     printf("3x3 拼图求解器\n\n");
 
-    int       node_count = 0; // 统计节点数量
-    int       leaf_count = 0; // 统计叶子节点数量
-    State     start_state;    // 初始状态
-    State     target_state;   // 目标状态
-    LinkQueue path;           // 路径队列
-    LinkQueue leafs;          // 叶子节点队列
-    StateMap  state_map;      // 映射表
+    bool need_find_path = false; // 是否需要查找路径
 
-    StateSet(start_state, "123456780");
-    StateSet(target_state, "047865123");
+    int       node_count = 0;    // 统计节点数量
+    int       leaf_count = 0;    // 统计叶子节点数量
+    State     root_state;        // 根状态
+    State     target_state;      // 目标状态
+    LinkQueue path;              // 路径队列
+    LinkQueue leafs;             // 叶子节点队列
+    StateMap  state_map;         // 映射表
+
     LinkQueueInit(path);
     LinkQueueInit(leafs);
     StateMapInit(state_map);
 
 
-    // 开始 BFS 搜索
+    // 处理命令行参数
+    {
+        switch(argc)
+        {
+        case 1: // 仅构建映射表，默认 123456780 为根状态
+            StateSet(root_state, "123456780");
+            printf("未指定目标状态，使用默认根状态 123456780\n");
+            break;
+
+        case 2: // 仅构建映射表，根据 argv[1] 为根状态
+            StateSet(root_state, argv[1]);
+            printf("使用根状态: %s\n", argv[1]);
+            break;
+
+        default: // 构建映射表，然后根据 argv[2] 查找路径
+            StateSet(root_state, argv[1]);
+            StateSet(target_state, argv[2]);
+            need_find_path = true;
+            printf("使用根状态: %s\n", argv[1]);
+            printf("目标状态: %s\n", argv[2]);
+            break;
+        }
+    }
+
+
+    // 开始 BFS 搜索，构建映射表
     {
         printf("开始 BFS 搜索...\n");
         clock_t start_time = clock(); // 记录开始时间
 
         // BFS(start_state, target_state, state_map, path);
-        BuildTree(start_state, state_map, leafs, node_count, leaf_count);                   // 构建状态树
+        BuildTree(root_state, state_map, leafs, node_count, leaf_count);                    // 构建状态树
 
         clock_t end_time     = clock();                                                     // 记录结束时间
         double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
         printf("BFS 搜索完成，耗时: %.2f 秒\n", elapsed_time);
-    }
-
-
-    // 根据映射表找到 path
-    {
-        FindPath(state_map, target_state, path); // 从状态映射中找到路径
     }
 
 
@@ -171,8 +193,14 @@ main(int argc, char* argv[])
         printf("叶子节点数: %d\n", leaf_count);
         SaveLeafsToFile(leafs, "leafs.txt");       // 保存叶子节点到文件
         SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件
+    }
 
-        SavePathToFile(path, "path.txt");          // 保存路径到文件
+
+    // 根据映射表找到 path
+    if(need_find_path)
+    {
+        FindPath(state_map, target_state, path); // 从状态映射中找到路径
+        SavePathToFile(path, "path.txt");        // 保存路径到文件
     }
 
     StateMapDestroy(state_map); // 销毁状态映射
