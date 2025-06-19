@@ -38,27 +38,18 @@ struct StateNode
 {
     StateNode(const State& state);
 
-    int deep = 0;                         // 最小步数
-
-    State   current_state;                // 当前状态
-    State   last_state;                   // 上一个状态
-    Operate operate = Operate::ZERO_NONE; // 操作（移动方向）
-
-    // Node_ptr last_list_node = nullptr;    // 指向上一个队列节点
-    // Node_ptr next_list_node = nullptr;    // 指向下一个队列节点
-
-    StateNode_ptr next_map_node = nullptr; // 指向下一个哈希表节点
+    int           deep;          // 最小步数
+    State         current_state; // 当前状态
+    State         last_state;    // 上一个状态
+    Operate       operate;       // 操作（移动方向）
+    StateNode_ptr next_map_node; // 指向下一个哈希表节点
 };
 
 
 struct LinkQueueNode
 {
-    LinkQueueNode(StateNode_ptr ptr)
-        : node(ptr)
-        , last(nullptr)
-        , next(nullptr)
-    {
-    }
+    LinkQueueNode(StateNode_ptr ptr);
+
     StateNode_ptr     node; // 指向状态节点
     LinkQueueNode_ptr last; // 指向上一个队列节点
     LinkQueueNode_ptr next; // 指向下一个队列节点
@@ -66,7 +57,6 @@ struct LinkQueueNode
 
 
 /* 函数声明 */
-void StateNodeCopy(StateNode& dest, const StateNode& src);                               // 复制节点
 void StateCopy(State& dest, const State& src);                                           // 复制状态
 void StateSet(State& state, const char* str);                                            // 设置状态
 bool StateEqual(const State& a, const State& b);                                         // 检查两个状态是否相等

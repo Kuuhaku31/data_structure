@@ -18,22 +18,18 @@ int_to_operate(int dir)
 }
 
 StateNode::StateNode(const State& state)
+    : deep(0)
+    , operate(Operate::ZERO_NONE)
+    , next_map_node(nullptr)
 {
     StateCopy(current_state, state);
 }
 
-void
-StateNodeCopy(StateNode& dest, const StateNode& src)
+LinkQueueNode::LinkQueueNode(StateNode_ptr ptr)
+    : node(ptr)
+    , last(nullptr)
+    , next(nullptr)
 {
-    dest.deep = src.deep;
-    StateCopy(dest.current_state, src.current_state);
-    StateCopy(dest.last_state, src.last_state);
-    dest.operate = src.operate;
-
-    // dest.last_list_node = src.last_list_node; // 复制队列指针
-    // dest.next_list_node = src.next_list_node; // 复制队列指针
-
-    dest.next_map_node = src.next_map_node; // 复制哈希表指针
 }
 
 
@@ -382,6 +378,22 @@ StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& 
 
         node_count++;                                   // 统计节点数量
         return true;
+    }
+}
+
+
+void
+FindPath(const StateMap& state_map, const State& target_state, LinkQueue& path)
+{
+    StateNode_ptr target_node = StateMapSearch(state_map, target_state); // 查找目标状态节点
+    if(!target_node) return;                                             // 如果目标状态不存在，直接返回
+
+    // 从目标状态向前回溯路径
+    StateNode_ptr path_node = target_node; // 从目标节点开始回溯路径
+    while(path_node != nullptr)
+    {
+        LinkQueuePushTail(path, path_node);                           // 将当前节点加入路径
+        path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
     }
 }
 
