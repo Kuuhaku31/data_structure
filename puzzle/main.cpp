@@ -20,15 +20,15 @@ SavePathToFile(const LinkQueue& path, const char* filename)
 
     // 处理循环队列
     // 从循环队尾开始打印路径
-    int        count   = 0;
-    StateNode* current = path;
+    int               count   = 0;
+    LinkQueueNode_ptr current = path;
     do
     {
-        current = current->last_list_node; // 向前移动到上一个节点
+        current = current->last; // 向前移动到上一个节点
 
         // 将当前状态写入文件
-        fprintf(file, "第 %d 步:\n", current->deep);
-        Operate dir = current->operate;
+        fprintf(file, "第 %d 步:\n", current->node->deep);
+        Operate dir = current->node->operate;
         switch(dir)
         {
         case Operate::ZERO_UP:
@@ -49,7 +49,7 @@ SavePathToFile(const LinkQueue& path, const char* filename)
         }
         for(int i = 0; i < 9; ++i)
         {
-            fprintf(file, "| %c ", current->current_state.data[i]);
+            fprintf(file, "| %c ", current->node->current_state.data[i]);
             if(i % 3 == 2) fprintf(file, "|\n"); // 每三列换行
         }
         fprintf(file, "\n");
@@ -79,7 +79,7 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
         fprintf(file, "哈希桶[%04d] -> ", i);
 
         // 打印链表
-        Node_ptr current = state_map[i];
+        StateNode_ptr current = state_map[i];
         while(current)
         {
             for(int j = 0; j < 9; ++j) fprintf(file, "%c", current->current_state.data[j]);
@@ -107,19 +107,19 @@ SaveLeafsToFile(const LinkQueue& queue, const char* filename)
     }
 
     // 处理循环队列
-    StateNode* current = queue;
+    LinkQueueNode_ptr current = queue;
     do
     {
         // 将当前状态写入文件
         for(int i = 0; i < 9; ++i)
         {
-            fprintf(file, "%c", current->current_state.data[i]);
+            fprintf(file, "%c", current->node->current_state.data[i]);
         }
         // 保存 deep
-        fprintf(file, " %d ", current->deep);
+        fprintf(file, " %d ", current->node->deep);
         fprintf(file, "\n");
 
-        current = current->last_list_node; // 向前移动到上一个节点
+        current = current->last; // 向前移动到上一个节点
     } while(current != queue); // 循环队列
 }
 
