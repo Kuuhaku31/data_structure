@@ -13,7 +13,6 @@ typedef struct LinkQueueNode LinkQueueNode; // 链式队列节点
 typedef StateNode*     StateNode_ptr;       // 节点指针
 typedef LinkQueueNode* LinkQueueNode_ptr;   // 链式队列节点指针
 typedef LinkQueueNode* LinkQueue;           // 链式队列
-typedef StateNode*     StateMap[HASH_SIZE]; // 哈希表，存储状态映射
 
 
 // 3x3 状态数组
@@ -57,6 +56,19 @@ struct LinkQueueNode
 };
 
 
+struct StateMap
+{
+    struct
+    {
+        StateNode_ptr node_ptr;
+        int           node_count; // 这个哈希桶中存储的节点数量
+    } map[HASH_SIZE];             // 哈希表，存储状态节点指针
+
+    int node_count = 0;           // 当前节点数量
+    int leaf_count = 0;           // 当前叶子节点数量
+};
+
+
 /* 函数声明 */
 
 void StateCopy(State& dest, const State& src);                            // 复制状态
@@ -73,7 +85,7 @@ void          StateMapInit(StateMap& map);                                // 初
 void          StateMapDestroy(StateMap& map);                             // 销毁状态映射
 StateNode_ptr StateMapSearch(const StateMap& map, const State& state);    // 查找状态
 unsigned      StateMapHash(const State& state);                           // 哈希函数
-bool          StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& node_count);
+bool          StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state);
 
 
 /* Build Tree */
@@ -88,7 +100,7 @@ bool          StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State
   - `node_count`: 用于记录节点总数
   - `leaf_count`: 用于记录叶子节点总数
 */
-void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count);
+void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& leaf_count);
 
 /*
 ### 利用 BFS 算法构建状态树

@@ -165,24 +165,25 @@ StateMapHash(const State& state)
 
 
 void
-StateMapInit(StateMap& map)
+StateMapInit(StateMap& state_map)
 {
     // 分配指针数组内存
     for(int i = 0; i < HASH_SIZE; ++i)
     {
-        map[i] = nullptr; // 初始化每个指针为 nullptr
+        state_map.map[i].node_ptr   = nullptr; // 初始化每个指针为 nullptr
+        state_map.map[i].node_count = 0;       // 初始化每个哈希桶的节点数量为 0
     }
 }
 
 
 void
-StateMapDestroy(StateMap& map)
+StateMapDestroy(StateMap& state_map)
 {
     // 遍历每个链表，释放节点内存
     for(int i = 0; i < HASH_SIZE; ++i)
     {
         StateNode_ptr temp    = nullptr;
-        StateNode_ptr current = map[i];
+        StateNode_ptr current = state_map.map[i].node_ptr;
         while(current)
         {
             temp    = current;
@@ -198,12 +199,12 @@ StateMapDestroy(StateMap& map)
 如果未找到匹配的状态，返回 `nullptr`
 */
 StateNode_ptr
-StateMapSearch(const StateMap& map, const State& state)
+StateMapSearch(const StateMap& state_map, const State& state)
 {
     unsigned index = StateMapHash(state); // 计算哈希值
 
     // 遍历链表查找状态
-    StateNode_ptr current = map[index];
+    StateNode_ptr current = state_map.map[index].node_ptr;
     while(current)
     {
         if(StateEqual(current->current_state, state)) return current; // 找到匹配的状态
@@ -220,14 +221,14 @@ StateMapSearch(const StateMap& map, const State& state)
 并且把新节点指针赋值给 `node_ptr`
 */
 bool
-StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& node_count)
+StateMapInsert(StateMap& state_map, StateNode_ptr& node_ptr, const State& state)
 {
     unsigned index = StateMapHash(state); // 计算哈希值
 
     // 检查是否已存在相同状态
     // 如果已存在相同状态，直接返回
     bool found = false;
-    node_ptr   = map[index];
+    node_ptr   = state_map.map[index].node_ptr;
     while(node_ptr)
     {
         if(StateEqual(node_ptr->current_state, state)) // 比较当前状态
@@ -237,14 +238,15 @@ StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& 
         }
         node_ptr = node_ptr->next_map_node;
     }
-    if(found) return false;                             // 如果已存在相同状态，返回 false
-    else                                                // 如果不存在相同状态，则创建新节点并插入到哈希表中
+    if(found) return false;                                            // 如果已存在相同状态，返回 false
+    else                                                               // 如果不存在相同状态，则创建新节点并插入到哈希表中
     {
-        node_ptr                = new StateNode(state); // 创建新节点
-        node_ptr->next_map_node = map[index];           // 新节点指向当前链表头
-        map[index]              = node_ptr;             // 更新链表头为新节点
+        node_ptr                      = new StateNode(state);          // 创建新节点
+        node_ptr->next_map_node       = state_map.map[index].node_ptr; // 新节点指向当前链表头
+        state_map.map[index].node_ptr = node_ptr;                      // 更新链表头为新节点
 
-        node_count++;                                   // 统计节点数量
+        state_map.map[index].node_count++;                             // 统计节点数量
+        state_map.node_count++;                                        // 更新总节点数量
         return true;
     }
 }
@@ -316,14 +318,14 @@ _create_new_state(const State& current_state, State& new_state, Operate dir)
     else return false;
 }
 void
-BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count)
+BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& leaf_count)
 {
     LinkQueue node_queue;      // 队列用于 BFS
     LinkQueueInit(node_queue); // 初始化队列
 
     StateNode_ptr start_node_ptr = nullptr;
-    StateMapInsert(state_map, start_node_ptr, start_state, node_count); // 插入初始状态到哈希表
-    LinkQueuePushTail(node_queue, start_node_ptr);                      // 将初始状态入队
+    StateMapInsert(state_map, start_node_ptr, start_state); // 插入初始状态到哈希表
+    LinkQueuePushTail(node_queue, start_node_ptr);          // 将初始状态入队
 
     // 开始 BFS 搜索
     while(!LinkQueueIsEmpty(node_queue))
@@ -342,7 +344,7 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
 
             // 如果新状态未被访问过
             StateNode_ptr new_map_node = nullptr;
-            if(StateMapInsert(state_map, new_map_node, next_state, node_count))
+            if(StateMapInsert(state_map, new_map_node, next_state))
             {
                 // 创建新节点并设置状态
                 new_map_node->deep          = current_node->deep + 1;      // 更新步数

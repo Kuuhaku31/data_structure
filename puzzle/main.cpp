@@ -76,10 +76,10 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
     // 打印哈希表的每个桶
     for(int i = 0; i < HASH_SIZE; ++i)
     {
-        fprintf(file, "哈希桶[%04d] -> ", i);
+        fprintf(file, "哈希桶[%04d] [count: %d] -> ", i, state_map.map[i].node_count);
 
         // 打印链表
-        StateNode_ptr current = state_map[i];
+        StateNode_ptr current = state_map.map[i].node_ptr;
         while(current)
         {
             fprintf(file, "[");
@@ -139,7 +139,6 @@ main(int argc, char* argv[])
 
     bool need_find_path = false; // 是否需要查找路径
 
-    int       node_count = 0;    // 统计节点数量
     int       leaf_count = 0;    // 统计叶子节点数量
     State     root_state;        // 根状态
     State     target_state;      // 目标状态
@@ -183,7 +182,7 @@ main(int argc, char* argv[])
         clock_t start_time = clock(); // 记录开始时间
 
         // BFS(start_state, target_state, state_map, path);
-        BuildTree(root_state, state_map, leafs, node_count, leaf_count);                    // 构建状态树
+        BuildTree(root_state, state_map, leafs, leaf_count);                                // 构建状态树
 
         clock_t end_time     = clock();                                                     // 记录结束时间
         double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
@@ -193,7 +192,7 @@ main(int argc, char* argv[])
 
     // 处理结果
     {
-        printf("总节点数: %d\n", node_count);
+        printf("总节点数: %d\n", state_map.node_count);
         printf("叶子节点数: %d\n", leaf_count);
         SaveLeafsToFile(leafs, "leafs.txt");       // 保存叶子节点到文件
         SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件
