@@ -17,13 +17,13 @@ int_to_operate(int dir)
     }
 }
 
-Node::Node(const State& state)
+StateNode::StateNode(const State& state)
 {
     StateCopy(current_state, state);
 }
 
 void
-NodeCopy(Node& dest, const Node& src)
+StateNodeCopy(StateNode& dest, const StateNode& src)
 {
     dest.deep = src.deep;
     StateCopy(dest.current_state, src.current_state);
@@ -33,7 +33,6 @@ NodeCopy(Node& dest, const Node& src)
     dest.last_list_node = src.last_list_node; // 复制队列指针
     dest.next_list_node = src.next_list_node; // 复制队列指针
 
-    dest.last_map_node = src.last_map_node;   // 复制哈希表指针
     dest.next_map_node = src.next_map_node;   // 复制哈希表指针
 }
 
@@ -222,7 +221,7 @@ StateMapSearch(const StateMap& map, const State& state)
 // 插入状态
 // 返回新节点指针
 Node_ptr
-StateMapInsert(StateMap& map, const Node& node)
+StateMapInsert(StateMap& map, const StateNode& node)
 {
     unsigned index = StateMapHash(node.current_state); // 计算哈希值
 
@@ -242,9 +241,9 @@ StateMapInsert(StateMap& map, const Node& node)
     if(found) return current;             // 如果已存在相同状态，返回对应节点指针
 
     // 创建新节点并设置状态
-    Node_ptr new_node       = new Node(node.current_state); // 创建新节点
-    *new_node               = node;                         // 复制节点信息
-    new_node->current_state = node.current_state;           // 设置当前状态
+    Node_ptr new_node       = new StateNode(node.current_state); // 创建新节点
+    *new_node               = node;                              // 复制节点信息
+    new_node->current_state = node.current_state;                // 设置当前状态
 
     // 将新节点插入到哈希表中
     new_node->next_map_node = map[index]; // 新节点指向当前链表头
@@ -262,7 +261,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
     LinkQueue node_queue;                                             // 队列用于 BFS
     LinkQueueInit(node_queue);                                        // 初始化队列
 
-    Node start_node(start_state);                                     // 创建初始状态节点
+    StateNode start_node(start_state);                                // 创建初始状态节点
     start_node.current_state = start_state;                           // 设置初始状态
     Node_ptr start_node_ptr  = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
     LinkQueuePushTail(node_queue, start_node_ptr);                    // 将初始状态入队
@@ -332,7 +331,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                 if(!StateMapSearch(state_map, next_state))
                 {
                     // 创建新节点并设置状态
-                    Node next_node(next_state);                            // 创建新节点
+                    StateNode next_node(next_state);                       // 创建新节点
                     next_node.deep          = current_node->deep + 1;      // 更新步数
                     next_node.current_state = next_state;                  // 更新新状态
                     next_node.last_state    = current_node->current_state; // 记录上一个状态
@@ -368,14 +367,14 @@ StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state, int& node_
         }
         node_ptr = node_ptr->next_map_node;
     }
-    if(found) return false;                        // 如果已存在相同状态，返回 false
-    else                                           // 如果不存在相同状态，则创建新节点并插入到哈希表中
+    if(found) return false;                             // 如果已存在相同状态，返回 false
+    else                                                // 如果不存在相同状态，则创建新节点并插入到哈希表中
     {
-        node_ptr                = new Node(state); // 创建新节点
-        node_ptr->next_map_node = map[index];      // 新节点指向当前链表头
-        map[index]              = node_ptr;        // 更新链表头为新节点
+        node_ptr                = new StateNode(state); // 创建新节点
+        node_ptr->next_map_node = map[index];           // 新节点指向当前链表头
+        map[index]              = node_ptr;             // 更新链表头为新节点
 
-        node_count++;                              // 统计节点数量
+        node_count++;                                   // 统计节点数量
         return true;
     }
 }
@@ -438,7 +437,7 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
         Node_ptr current_node = LinkQueuePopHead(node_queue);
 
         // 尝试四个方向移动 '0'
-        bool is_leaf = true; // 标记是否为叶子节点
+        bool is_leaf = true;
         for(int i = 0; i < 4; ++i)
         {
             // 如果无法创建新状态
@@ -462,7 +461,7 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
                 is_leaf = false; // 只要有一个子节点，就不是叶子节点
             }
         }
-        if(is_leaf)                                 // 如果当前节点没有子节点，则将其视为叶子节点
+        if(is_leaf)
         {
             LinkQueuePushTail(leafs, current_node); // 将当前节点添加到叶子节点队列
             leaf_count++;                           // 统计叶子节点数量

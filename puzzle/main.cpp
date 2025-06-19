@@ -20,8 +20,8 @@ SavePathToFile(const LinkQueue& path, const char* filename)
 
     // 处理循环队列
     // 从循环队尾开始打印路径
-    int   count   = 0;
-    Node* current = path;
+    int        count   = 0;
+    StateNode* current = path;
     do
     {
         current = current->last_list_node; // 向前移动到上一个节点
@@ -107,7 +107,7 @@ SaveLeafsToFile(const LinkQueue& queue, const char* filename)
     }
 
     // 处理循环队列
-    Node* current = queue;
+    StateNode* current = queue;
     do
     {
         // 将当前状态写入文件
