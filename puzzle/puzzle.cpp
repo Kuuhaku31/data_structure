@@ -318,7 +318,7 @@ _create_new_state(const State& current_state, State& new_state, Operate dir)
     else return false;
 }
 void
-BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& leaf_count)
+BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs)
 {
     LinkQueue node_queue;      // 队列用于 BFS
     LinkQueueInit(node_queue); // 初始化队列
@@ -361,7 +361,7 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
         if(is_leaf)
         {
             LinkQueuePushTail(leafs, current_node); // 将当前节点添加到叶子节点队列
-            leaf_count++;                           // 统计叶子节点数量
+            state_map.leaf_count++;                 // 更新叶子节点数量
         }
     }
 

@@ -131,6 +131,49 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
 }
 
 
+void
+PrintStateMapInfo(const StateMap& state_map)
+{
+    printf("\n=== 状态映射信息 ===\n");
+    printf("总节点数: %d\n", state_map.node_count);
+    printf("叶子节点数: %d\n", state_map.leaf_count);
+
+    int zero_count = 0;    // 空的哈希桶的数量
+
+    double average  = 0.0; // 平均每个哈希桶的节点数
+    double variance = 0.0; // 方差
+    for(int i = 0; i < HASH_SIZE; i++)
+    {
+        if(state_map.map[i].node_count > 0)
+        {
+            average += state_map.map[i].node_count;
+        }
+        else
+        {
+            zero_count++; // 统计空的哈希桶数量
+        }
+    }
+    average /= HASH_SIZE;
+
+    for(int i = 0; i < HASH_SIZE; i++)
+    {
+        if(state_map.map[i].node_count > 0)
+        {
+            double diff  = state_map.map[i].node_count - average;
+            variance    += diff * diff;
+        }
+    }
+    variance /= HASH_SIZE;
+
+    printf("哈希桶总数: %d\n", HASH_SIZE);
+    printf("空的哈希桶数量: %d\n", zero_count);
+    printf("哈希桶利用率: %.2f%%\n", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
+    printf("平均每个哈希桶节点数: %.2f\n", average);
+    printf("哈希桶节点数方差: %.2f\n", variance);
+    printf("=== 状态映射信息结束 ===\n\n");
+}
+
+
 // puzzle.exe < 根状态 > < 目标状态 >
 int
 main(int argc, char* argv[])
@@ -139,7 +182,6 @@ main(int argc, char* argv[])
 
     bool need_find_path = false; // 是否需要查找路径
 
-    int       leaf_count = 0;    // 统计叶子节点数量
     State     root_state;        // 根状态
     State     target_state;      // 目标状态
     LinkQueue path;              // 路径队列
@@ -182,7 +224,7 @@ main(int argc, char* argv[])
         clock_t start_time = clock(); // 记录开始时间
 
         // BFS(start_state, target_state, state_map, path);
-        BuildTree(root_state, state_map, leafs, leaf_count);                                // 构建状态树
+        BuildTree(root_state, state_map, leafs);                                            // 构建状态树
 
         clock_t end_time     = clock();                                                     // 记录结束时间
         double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
@@ -192,8 +234,8 @@ main(int argc, char* argv[])
 
     // 处理结果
     {
-        printf("总节点数: %d\n", state_map.node_count);
-        printf("叶子节点数: %d\n", leaf_count);
+        PrintStateMapInfo(state_map);              // 打印状态映射信息
+
         SaveLeafsToFile(leafs, "leafs.txt");       // 保存叶子节点到文件
         SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件
     }

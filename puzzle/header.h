@@ -100,7 +100,7 @@ bool          StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State
   - `node_count`: 用于记录节点总数
   - `leaf_count`: 用于记录叶子节点总数
 */
-void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& leaf_count);
+void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs);
 
 /*
 ### 利用 BFS 算法构建状态树
