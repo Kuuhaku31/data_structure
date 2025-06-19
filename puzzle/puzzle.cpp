@@ -17,6 +17,10 @@ int_to_operate(int dir)
     }
 }
 
+Node::Node(const State& state)
+{
+    StateCopy(current_state, state);
+}
 
 void
 NodeCopy(Node& dest, const Node& src)
@@ -238,9 +242,9 @@ StateMapInsert(StateMap& map, const Node& node)
     if(found) return current;             // 如果已存在相同状态，返回对应节点指针
 
     // 创建新节点并设置状态
-    Node_ptr new_node       = new Node;
-    *new_node               = node;               // 复制节点信息
-    new_node->current_state = node.current_state; // 设置当前状态
+    Node_ptr new_node       = new Node(node.current_state); // 创建新节点
+    *new_node               = node;                         // 复制节点信息
+    new_node->current_state = node.current_state;           // 设置当前状态
 
     // 将新节点插入到哈希表中
     new_node->next_map_node = map[index]; // 新节点指向当前链表头
@@ -255,10 +259,10 @@ StateMapInsert(StateMap& map, const Node& node)
 void
 BFS(const State& start_state, const State& target_state, StateMap& state_map, LinkQueue& path)
 {
-    LinkQueue node_queue;      // 队列用于 BFS
-    LinkQueueInit(node_queue); // 初始化队列
+    LinkQueue node_queue;                                             // 队列用于 BFS
+    LinkQueueInit(node_queue);                                        // 初始化队列
 
-    Node start_node;
+    Node start_node(start_state);                                     // 创建初始状态节点
     start_node.current_state = start_state;                           // 设置初始状态
     Node_ptr start_node_ptr  = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
     LinkQueuePushTail(node_queue, start_node_ptr);                    // 将初始状态入队
@@ -328,7 +332,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
                 if(!StateMapSearch(state_map, next_state))
                 {
                     // 创建新节点并设置状态
-                    Node next_node;
+                    Node next_node(next_state);                            // 创建新节点
                     next_node.deep          = current_node->deep + 1;      // 更新步数
                     next_node.current_state = next_state;                  // 更新新状态
                     next_node.last_state    = current_node->current_state; // 记录上一个状态
@@ -347,7 +351,7 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
 
 
 bool
-StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state)
+StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state, int& node_count)
 {
     unsigned index = StateMapHash(state); // 计算哈希值
 
@@ -364,13 +368,14 @@ StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state)
         }
         node_ptr = node_ptr->next_map_node;
     }
-    if(found) return false; // 如果已存在相同状态，返回 false
-    else                    // 如果不存在相同状态，则创建新节点并插入到哈希表中
+    if(found) return false;                        // 如果已存在相同状态，返回 false
+    else                                           // 如果不存在相同状态，则创建新节点并插入到哈希表中
     {
-        node_ptr                = new Node;
-        node_ptr->next_map_node = map[index]; // 新节点指向当前链表头
-        map[index]              = node_ptr;   // 更新链表头为新节点
+        node_ptr                = new Node(state); // 创建新节点
+        node_ptr->next_map_node = map[index];      // 新节点指向当前链表头
+        map[index]              = node_ptr;        // 更新链表头为新节点
 
+        node_count++;                              // 统计节点数量
         return true;
     }
 }
@@ -422,35 +427,28 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
     LinkQueue node_queue;      // 队列用于 BFS
     LinkQueueInit(node_queue); // 初始化队列
 
-    Node start_node;
-    start_node.current_state = start_state;                           // 设置初始状态
-    Node_ptr start_node_ptr  = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
-    node_count++;                                                     // 统计节点数量
-    LinkQueuePushTail(node_queue, start_node_ptr);                    // 将初始状态入队
+    Node_ptr start_node_ptr = nullptr;
+    StateMapInsert(state_map, start_node_ptr, start_state, node_count); // 插入初始状态到哈希表
+    LinkQueuePushTail(node_queue, start_node_ptr);                      // 将初始状态入队
+
+    // 开始 BFS 搜索
     while(!LinkQueueIsEmpty(node_queue))
     {
         // 当前状态出队
         Node_ptr current_node = LinkQueuePopHead(node_queue);
 
-
-        // 获取当前状态中 '0' 的位置
-        int z = StateFindZero(current_node->current_state);
-        int x = z % 3;
-        int y = z / 3;
-
         // 尝试四个方向移动 '0'
-        bool     is_leaf = true; // 标记是否为叶子节点
-        State    next_state;     // 用于存储新状态
-        Node_ptr new_map_node = nullptr;
+        bool is_leaf = true; // 标记是否为叶子节点
         for(int i = 0; i < 4; ++i)
         {
-            Operate dir = int_to_operate(i);
-
             // 如果无法创建新状态
+            Operate dir = int_to_operate(i);
+            State   next_state;
             if(!_create_new_state(current_node->current_state, next_state, dir)) continue;
 
             // 如果新状态未被访问过
-            if(StateMapInsert(state_map, new_map_node, next_state))
+            Node_ptr new_map_node = nullptr;
+            if(StateMapInsert(state_map, new_map_node, next_state, node_count))
             {
                 // 创建新节点并设置状态
                 new_map_node->deep          = current_node->deep + 1;      // 更新步数
@@ -458,21 +456,16 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
                 new_map_node->last_state    = current_node->current_state; // 记录上一个状态
                 new_map_node->operate       = dir;                         // 记录操作方向
 
-                node_count++;                                              // 统计节点数量
-
                 // 将新状态入队
                 LinkQueuePushTail(node_queue, new_map_node);
 
                 is_leaf = false; // 只要有一个子节点，就不是叶子节点
             }
         }
-
-        // 如果当前节点没有子节点，则将其视为叶子节点
-        if(is_leaf)
+        if(is_leaf)                                 // 如果当前节点没有子节点，则将其视为叶子节点
         {
-            // 将当前节点添加到叶子节点队列
-            LinkQueuePushTail(leafs, current_node);
-            leaf_count++; // 统计叶子节点数量
+            LinkQueuePushTail(leafs, current_node); // 将当前节点添加到叶子节点队列
+            leaf_count++;                           // 统计叶子节点数量
         }
     }
 

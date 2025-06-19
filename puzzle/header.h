@@ -34,6 +34,8 @@ Operate int_to_operate(int dir);
 // 节点结构体
 struct Node
 {
+    Node(const State& state);
+
     int deep = 0;                         // 最小步数
 
     State   current_state;                // 当前状态
@@ -84,7 +86,7 @@ void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, 
 // 尝试插入状态
 // 如果状态已存在，则返回 false
 // 否则插入新状态并返回 true，并且把新节点指针赋值给 node_ptr
-bool StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state);
+bool StateMapInsert(StateMap& map, Node_ptr& node_ptr, const State& state, int& node_count);
 
 
 #endif // PUZZLE_HEADER_H
