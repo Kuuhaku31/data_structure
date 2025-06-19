@@ -71,16 +71,6 @@ StateFindZero(const State& state)
 }
 
 
-// 交换状态中两个位置的值
-void
-StateSwap(State& state, int index1, int index2)
-{
-    char temp          = state.data[index1]; // 临时变量存储 index1 的值
-    state.data[index1] = state.data[index2]; // 将 index2 的值赋给 index1
-    state.data[index2] = temp;               // 将临时变量的值赋给 index2
-}
-
-
 // 初始化队列
 void
 LinkQueueInit(LinkQueue& q)
@@ -93,17 +83,11 @@ LinkQueueInit(LinkQueue& q)
 void
 LinkQueuePushTail(LinkQueue& list, StateNode_ptr new_state_node)
 {
-    // 固定初始化为 nullptr
-    // new_node->next_list_node = nullptr;
-    // new_node->last_list_node = nullptr;
     LinkQueueNode_ptr new_list_node = new LinkQueueNode(new_state_node); // 创建新的链表节点
 
     // 如果队列为空，初始化新节点为队头和队尾
     if(list == nullptr)
     {
-        // new_node->next_list_node = new_node;
-        // new_node->last_list_node = new_node;
-        // list                     = new_node;
         new_list_node->next = new_list_node; // 新节点指向自己，形成循环
         new_list_node->last = new_list_node; // 新节点的上一个节点指向自己
         list                = new_list_node; // 将队列指针指向新节点
@@ -111,11 +95,6 @@ LinkQueuePushTail(LinkQueue& list, StateNode_ptr new_state_node)
     // 如果队列不为空，将新节点添加到队尾
     else
     {
-        // Node_ptr tail            = list->last_list_node;
-        // tail->next_list_node     = new_node;
-        // new_node->last_list_node = tail;
-        // new_node->next_list_node = list;
-        // list->last_list_node     = new_node;
         LinkQueueNode_ptr tail = list->last;    // 获取队尾节点
         tail->next             = new_list_node; // 将新节点添加到队尾
         new_list_node->last    = tail;          // 新节点的上一个节点指向队尾节点
@@ -220,137 +199,6 @@ StateMapSearch(const StateMap& map, const State& state)
 }
 
 
-// 插入状态
-// 返回新节点指针
-StateNode_ptr
-StateMapInsert(StateMap& map, const StateNode& node)
-{
-    unsigned index = StateMapHash(node.current_state); // 计算哈希值
-
-    // 检查是否已存在相同状态
-    // 如果已存在相同状态，直接返回
-    bool          found   = false;
-    StateNode_ptr current = map[index];
-    while(current)
-    {
-        if(StateEqual(current->current_state, node.current_state)) // 比较当前状态
-        {
-            found = true;
-            break;
-        }
-        current = current->next_map_node; // 移动到下一个节点
-    }
-    if(found) return current;             // 如果已存在相同状态，返回对应节点指针
-
-    // 创建新节点并设置状态
-    StateNode_ptr new_node  = new StateNode(node.current_state); // 创建新节点
-    *new_node               = node;                              // 复制节点信息
-    new_node->current_state = node.current_state;                // 设置当前状态
-
-    // 将新节点插入到哈希表中
-    new_node->next_map_node = map[index]; // 新节点指向当前链表头
-    map[index]              = new_node;   // 更新链表头为新节点
-
-    // 返回新节点指针
-    return new_node;
-}
-
-
-// BFS + 路径恢复
-void
-BFS(const State& start_state, const State& target_state, StateMap& state_map, LinkQueue& path)
-{
-    LinkQueue node_queue;                                                 // 队列用于 BFS
-    LinkQueueInit(node_queue);                                            // 初始化队列
-
-    StateNode start_node(start_state);                                    // 创建初始状态节点
-    start_node.current_state     = start_state;                           // 设置初始状态
-    StateNode_ptr start_node_ptr = StateMapInsert(state_map, start_node); // 插入初始状态到哈希表
-    LinkQueuePushTail(node_queue, start_node_ptr);                        // 将初始状态入队
-    while(!LinkQueueIsEmpty(node_queue))
-    {
-        // 当前状态出队
-        StateNode_ptr current_node = LinkQueuePopHead(node_queue);
-
-        // 如果当前状态是目标状态
-        if(StateEqual(current_node->current_state, target_state))
-        {
-            // 从目标状态向前回溯路径
-            StateNode_ptr path_node = current_node; // 从当前节点开始回溯路径
-            while(path_node != nullptr)
-            {
-                LinkQueuePushTail(path, path_node);                           // 将当前节点加入路径
-                path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
-            }
-
-            break;
-        }
-
-        // 获取当前状态中 '0' 的位置
-        int z = StateFindZero(current_node->current_state);
-        int x = z % 3;
-        int y = z / 3;
-
-        // 尝试四个方向移动 '0'
-        for(int i = 0; i < 4; ++i)
-        {
-            Operate dir = static_cast<Operate>(i);
-
-            int nx = 0;
-            int ny = 0;
-
-            switch(dir)
-            {
-            case Operate::ZERO_UP:
-                nx = x;
-                ny = y - 1; // 向上移动
-                break;
-            case Operate::ZERO_RIGHT:
-                nx = x + 1; // 向右移动
-                ny = y;
-                break;
-            case Operate::ZERO_DOWN:
-                nx = x;
-                ny = y + 1; // 向下移动
-                break;
-            case Operate::ZERO_LEFT:
-                nx = x - 1; // 向左移动
-                ny = y;
-                break;
-            }
-
-            // 检查新位置是否在 3x3 网格内
-            if(nx >= 0 && nx < 3 && ny >= 0 && ny < 3)
-            {
-                // 新位置的索引
-                int nz = ny * 3 + nx;
-
-                // 生成新状态
-                State next_state = current_node->current_state;
-                StateSwap(next_state, z, nz);
-
-                // 如果新状态未被访问过
-                if(!StateMapSearch(state_map, next_state))
-                {
-                    // 创建新节点并设置状态
-                    StateNode next_node(next_state);                       // 创建新节点
-                    next_node.deep          = current_node->deep + 1;      // 更新步数
-                    next_node.current_state = next_state;                  // 更新新状态
-                    next_node.last_state    = current_node->current_state; // 记录上一个状态
-                    next_node.operate       = dir;                         // 记录操作方向
-
-                    // 插入新状态到哈希表
-                    StateNode_ptr new_map_node = StateMapInsert(state_map, next_node);
-
-                    // 将新状态入队
-                    LinkQueuePushTail(node_queue, new_map_node);
-                }
-            }
-        }
-    }
-}
-
-
 bool
 StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& node_count)
 {
@@ -403,7 +251,13 @@ _create_new_state(const State& current_state, State& new_state, Operate dir)
 {
     // 计算 '0' 的位置
     // 获取当前状态中 '0' 的位置
-    int z = StateFindZero(current_state);
+
+    int z = -0;
+    for(int i = 0; i < 9; ++i)
+    {
+        if(current_state.data[i] == '0') z = i; // 返回 '0' 的索引位置
+    }
+
     int x = z % 3;
     int y = z / 3;
 
@@ -432,7 +286,10 @@ _create_new_state(const State& current_state, State& new_state, Operate dir)
 
         // 生成新状态
         StateCopy(new_state, current_state); // 复制当前状态
-        StateSwap(new_state, z, nz);         // 交换 '0' 和新位置的值
+        // 交换 '0' 和新位置的值
+        char temp          = new_state.data[z];
+        new_state.data[z]  = new_state.data[nz];
+        new_state.data[nz] = temp;
 
         return true;
     }

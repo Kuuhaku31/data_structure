@@ -111,12 +111,13 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
     do
     {
         // 将当前状态写入文件
+        fprintf(file, "state: ");
         for(int i = 0; i < 9; ++i)
         {
             fprintf(file, "%c", current->node->current_state.data[i]);
         }
         // 保存 deep
-        fprintf(file, " %d ", current->node->deep);
+        fprintf(file, " deep: %d ", current->node->deep);
         fprintf(file, "\n");
 
         current = current->last; // 向前移动到上一个节点
@@ -199,11 +200,17 @@ main(int argc, char* argv[])
     // 根据映射表找到 path
     if(need_find_path)
     {
+        printf("开始查找从根状态到目标状态的路径...\n");
         FindPath(state_map, target_state, path); // 从状态映射中找到路径
         SavePathToFile(path, "path.txt");        // 保存路径到文件
     }
 
-    StateMapDestroy(state_map); // 销毁状态映射
+
+    // 清理资源
+    {
+        StateMapDestroy(state_map); // 销毁状态映射
+    }
+
 
     return 0;
 }

@@ -57,24 +57,19 @@ struct LinkQueueNode
 
 
 /* 函数声明 */
-void StateCopy(State& dest, const State& src);                                           // 复制状态
-void StateSet(State& state, const char* str);                                            // 设置状态
-bool StateEqual(const State& a, const State& b);                                         // 检查两个状态是否相等
-int  StateFindZero(const State& state);                                                  // 查找状态中 '0' 的位置
-void StateSwap(State& state, int index1, int index2);                                    // 交换状态中两个位置的值
+void StateCopy(State& dest, const State& src);                            // 复制状态
+void StateSet(State& state, const char* str);                             // 设置状态
+bool StateEqual(const State& a, const State& b);                          // 检查两个状态是否相等
 
-void          LinkQueueInit(LinkQueue& list);                                            // 初始化队列
-void          LinkQueuePushTail(LinkQueue& list, StateNode_ptr res_node);                // 入队操作
-StateNode_ptr LinkQueuePopHead(LinkQueue& list);                                         // 出队操作
-bool          LinkQueueIsEmpty(const LinkQueue& list);                                   // 检查队列是否为空
+void          LinkQueueInit(LinkQueue& list);                             // 初始化队列
+void          LinkQueuePushTail(LinkQueue& list, StateNode_ptr res_node); // 入队操作
+StateNode_ptr LinkQueuePopHead(LinkQueue& list);                          // 出队操作
+bool          LinkQueueIsEmpty(const LinkQueue& list);                    // 检查队列是否为空
 
-void          StateMapInit(StateMap& map);                                               // 初始化状态映射
-void          StateMapDestroy(StateMap& map);                                            // 销毁状态映射
-StateNode_ptr StateMapSearch(const StateMap& map, const State& state);                   // 查找状态
-StateNode_ptr StateMapInsert(StateMap& map, const StateNode& node);                      // 插入状态，返回新节点指针
-unsigned      StateMapHash(const State& state);                                          // 哈希函数
-
-void BFS(const State& start, const State& target, StateMap& state_map, LinkQueue& path); // 广度优先搜索
+void          StateMapInit(StateMap& map);                                // 初始化状态映射
+void          StateMapDestroy(StateMap& map);                             // 销毁状态映射
+StateNode_ptr StateMapSearch(const StateMap& map, const State& state);    // 查找状态
+unsigned      StateMapHash(const State& state);                           // 哈希函数
 
 
 /* Build Tree */
