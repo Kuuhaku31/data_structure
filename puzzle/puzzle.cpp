@@ -17,6 +17,7 @@ int_to_operate(int dir)
     }
 }
 
+
 StateNode::StateNode(const State& state)
     : deep(0)
     , operate(Operate::ZERO_NONE)
@@ -24,6 +25,7 @@ StateNode::StateNode(const State& state)
 {
     StateCopy(current_state, state);
 }
+
 
 LinkQueueNode::LinkQueueNode(StateNode_ptr ptr)
     : node(ptr)
@@ -39,7 +41,7 @@ StateCopy(State& dest, const State& src)
     for(int i = 0; i < 9; ++i) dest.data[i] = src.data[i]; // 逐个复制状态数组中的字符
 }
 
-// 设置 3x3 状态
+
 void
 StateSet(State& state, const char* str)
 {
@@ -47,7 +49,6 @@ StateSet(State& state, const char* str)
 }
 
 
-// 检查两个状态是否相等
 bool
 StateEqual(const State& a, const State& b)
 {
@@ -59,7 +60,6 @@ StateEqual(const State& a, const State& b)
 }
 
 
-// 查找状态中 '0' 的位置
 int
 StateFindZero(const State& state)
 {
@@ -71,7 +71,6 @@ StateFindZero(const State& state)
 }
 
 
-// 初始化队列
 void
 LinkQueueInit(LinkQueue& q)
 {
@@ -79,7 +78,25 @@ LinkQueueInit(LinkQueue& q)
 }
 
 
-// 入队操作
+void
+LinkQueueDestroy(LinkQueue& list)
+{
+    // 销毁循环队列
+    if(list == nullptr) return;            // 如果队列为空，直接返回
+
+    LinkQueueNode_ptr current   = list;    // 从队头开始遍历
+    LinkQueueNode_ptr next_node = nullptr; // 用于保存下一个节点
+    do
+    {
+        next_node = current->next; // 保存下一个节点
+        delete current;            // 删除当前节点
+        current = next_node;       // 移动到下一个节点
+    } while(current != list); // 循环直到回到队头
+
+    list = nullptr; // 最后将队列指针置为 nullptr
+}
+
+
 void
 LinkQueuePushTail(LinkQueue& list, StateNode_ptr new_state_node)
 {
@@ -104,7 +121,6 @@ LinkQueuePushTail(LinkQueue& list, StateNode_ptr new_state_node)
 }
 
 
-// 出队操作
 StateNode_ptr
 LinkQueuePopHead(LinkQueue& list)
 {
@@ -129,7 +145,6 @@ LinkQueuePopHead(LinkQueue& list)
 }
 
 
-// 检查队列是否为空
 bool
 LinkQueueIsEmpty(const LinkQueue& q)
 {
@@ -137,7 +152,6 @@ LinkQueueIsEmpty(const LinkQueue& q)
 }
 
 
-// 计算状态的哈希值
 unsigned
 StateMapHash(const State& state)
 {
@@ -150,7 +164,6 @@ StateMapHash(const State& state)
 }
 
 
-// 初始化状态映射
 void
 StateMapInit(StateMap& map)
 {
@@ -162,7 +175,6 @@ StateMapInit(StateMap& map)
 }
 
 
-// 销毁状态映射
 void
 StateMapDestroy(StateMap& map)
 {
@@ -180,8 +192,11 @@ StateMapDestroy(StateMap& map)
     }
 }
 
-
-// 查找状态
+/*
+### 查找状态
+如果找到匹配的状态，返回指向该状态节点的指针
+如果未找到匹配的状态，返回 `nullptr`
+*/
 StateNode_ptr
 StateMapSearch(const StateMap& map, const State& state)
 {
@@ -198,7 +213,12 @@ StateMapSearch(const StateMap& map, const State& state)
     return nullptr;
 }
 
-
+/*
+### 插入状态
+如果状态已存在，则返回 `false`
+否则插入新状态，`node_count` 加 1 并返回 `true`
+并且把新节点指针赋值给 `node_ptr`
+*/
 bool
 StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& node_count)
 {
@@ -344,5 +364,5 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
     }
 
     // BFS 完成后，node_queue 中的节点已全部处理完毕
-    // leafs 中包含所有叶子节点，state_map 中包含所有访问过的
+    // leafs 中包含所有叶子节点，state_map 中包含所有访问过的状态
 }

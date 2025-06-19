@@ -15,6 +15,7 @@ typedef LinkQueueNode* LinkQueueNode_ptr;   // 链式队列节点指针
 typedef LinkQueueNode* LinkQueue;           // 链式队列
 typedef StateNode*     StateMap[HASH_SIZE]; // 哈希表，存储状态映射
 
+
 // 3x3 状态数组
 struct State
 {
@@ -31,6 +32,7 @@ enum Operate
     ZERO_NONE  = 4,
 };
 
+// 将整数转换为操作方向
 Operate int_to_operate(int dir);
 
 // 节点结构体
@@ -45,7 +47,6 @@ struct StateNode
     StateNode_ptr next_map_node; // 指向下一个哈希表节点
 };
 
-
 struct LinkQueueNode
 {
     LinkQueueNode(StateNode_ptr ptr);
@@ -57,11 +58,13 @@ struct LinkQueueNode
 
 
 /* 函数声明 */
+
 void StateCopy(State& dest, const State& src);                            // 复制状态
 void StateSet(State& state, const char* str);                             // 设置状态
 bool StateEqual(const State& a, const State& b);                          // 检查两个状态是否相等
 
 void          LinkQueueInit(LinkQueue& list);                             // 初始化队列
+void          LinkQueueDestroy(LinkQueue& list);                          // 销毁队列
 void          LinkQueuePushTail(LinkQueue& list, StateNode_ptr res_node); // 入队操作
 StateNode_ptr LinkQueuePopHead(LinkQueue& list);                          // 出队操作
 bool          LinkQueueIsEmpty(const LinkQueue& list);                    // 检查队列是否为空
@@ -70,6 +73,7 @@ void          StateMapInit(StateMap& map);                                // 初
 void          StateMapDestroy(StateMap& map);                             // 销毁状态映射
 StateNode_ptr StateMapSearch(const StateMap& map, const State& state);    // 查找状态
 unsigned      StateMapHash(const State& state);                           // 哈希函数
+bool          StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& node_count);
 
 
 /* Build Tree */
@@ -81,15 +85,18 @@ unsigned      StateMapHash(const State& state);                           // 哈
   - `start`: 起始状态
   - `state_map`: 状态映射，用于存储已访问的状态
   - `leafs`: 用于存储所有叶子节点（目标状态）
-    - `node_count`: 用于记录节点总数
+  - `node_count`: 用于记录节点总数
+  - `leaf_count`: 用于记录叶子节点总数
 */
 void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count);
 
-// 尝试插入状态
-// 如果状态已存在，则返回 false
-// 否则插入新状态并返回 true，并且把新节点指针赋值给 node_ptr
-bool StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state, int& node_count);
-
+/*
+### 利用 BFS 算法构建状态树
+参数：
+ - `state_map`: 状态映射，用于存储已访问的状态
+ - `target_state`: 目标状态
+ - `path`: 用于存储找到的路径
+*/
 void FindPath(const StateMap& state_map, const State& target_state, LinkQueue& path);
 
 

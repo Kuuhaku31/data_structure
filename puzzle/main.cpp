@@ -82,12 +82,15 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
         StateNode_ptr current = state_map[i];
         while(current)
         {
+            fprintf(file, "[");
             for(int j = 0; j < 9; ++j) fprintf(file, "%c", current->current_state.data[j]);
-            fprintf(file, " -> ");
+            fprintf(file, " from: ");
+            for(int j = 0; j < 9; ++j) fprintf(file, "%c", current->last_state.data[j]);
+            fprintf(file, "] -> ");
             current = current->next_map_node; // 移动到下一个节点
         }
 
-        fprintf(file, "NULL\n");
+        fprintf(file, "[NULL]\n");
     }
 
     printf("状态映射已保存到 %s\n", filename);
@@ -144,9 +147,9 @@ main(int argc, char* argv[])
     LinkQueue leafs;             // 叶子节点队列
     StateMap  state_map;         // 映射表
 
-    LinkQueueInit(path);
-    LinkQueueInit(leafs);
-    StateMapInit(state_map);
+    LinkQueueInit(path);         // 初始化路径队列
+    LinkQueueInit(leafs);        // 初始化叶子节点队列
+    StateMapInit(state_map);     // 初始化状态映射表
 
 
     // 处理命令行参数
@@ -208,6 +211,8 @@ main(int argc, char* argv[])
 
     // 清理资源
     {
+        LinkQueueDestroy(path);     // 销毁路径队列
+        LinkQueueDestroy(leafs);    // 销毁叶子节点队列
         StateMapDestroy(state_map); // 销毁状态映射
     }
 
