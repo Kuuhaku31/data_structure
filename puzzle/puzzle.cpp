@@ -4,6 +4,25 @@
 #include "header.h"
 
 
+Operate
+operate(int dir)
+{
+    switch(dir)
+    {
+    case 0: return Operate::ZERO_UP;
+    case 1: return Operate::ZERO_RIGHT;
+    case 2: return Operate::ZERO_DOWN;
+    case 3: return Operate::ZERO_LEFT;
+    default: return Operate::ZERO_NONE; // 默认返回 NONE
+    }
+}
+
+void
+StateCopy(State& dest, const State& src)
+{
+    for(int i = 0; i < 9; ++i) dest.data[i] = src.data[i]; // 逐个复制状态数组中的字符
+}
+
 // 设置 3x3 状态
 void
 StateSet(State& state, const char* str)
@@ -260,19 +279,19 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
 
             switch(dir)
             {
-            case Operate::UP:
+            case Operate::ZERO_UP:
                 nx = x;
                 ny = y - 1; // 向上移动
                 break;
-            case Operate::RIGHT:
+            case Operate::ZERO_RIGHT:
                 nx = x + 1; // 向右移动
                 ny = y;
                 break;
-            case Operate::DOWN:
+            case Operate::ZERO_DOWN:
                 nx = x;
                 ny = y + 1; // 向下移动
                 break;
-            case Operate::LEFT:
+            case Operate::ZERO_LEFT:
                 nx = x - 1; // 向左移动
                 ny = y;
                 break;
@@ -310,6 +329,48 @@ BFS(const State& start_state, const State& target_state, StateMap& state_map, Li
 }
 
 
+static inline bool
+_creat_new_state(const State& current_state, State& new_state, Operate dir)
+{
+    // 计算 '0' 的位置
+    // 获取当前状态中 '0' 的位置
+    int z = StateFindZero(current_state);
+    int x = z % 3;
+    int y = z / 3;
+
+    // 根据方向移动 '0'
+    switch(dir)
+    {
+    case Operate::ZERO_UP:
+        y -= 1; // 向上移动
+        break;
+    case Operate::ZERO_RIGHT:
+        x += 1; // 向右移动
+        break;
+    case Operate::ZERO_DOWN:
+        y += 1; // 向下移动
+        break;
+    case Operate::ZERO_LEFT:
+        x -= 1; // 向左移动
+        break;
+    }
+
+    // 检查新位置是否在 3x3 网格内
+    if(x >= 0 && x < 3 && y >= 0 && y < 3)
+    {
+        // 新位置的索引
+        int nz = y * 3 + x;
+
+        // 生成新状态
+        StateCopy(new_state, current_state); // 复制当前状态
+        StateSwap(new_state, z, nz);         // 交换 '0' 和新位置的值
+
+        return true;
+    }
+    else return false;
+}
+
+
 void
 BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& node_count, int& leaf_count)
 {
@@ -326,19 +387,6 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
         // 当前状态出队
         Node_ptr current_node = LinkQueuePopHead(node_queue);
 
-        // // 如果当前状态是目标状态
-        // if(StateEqual(current_node->current_state, target_state))
-        // {
-        //     // 从目标状态向前回溯路径
-        //     Node_ptr path_node = current_node; // 从当前节点开始回溯路径
-        //     while(path_node != nullptr)
-        //     {
-        //         LinkQueuePushTail(path, path_node);                           // 将当前节点加入路径
-        //         path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
-        //     }
-
-        //     break;
-        // }
 
         // 获取当前状态中 '0' 的位置
         int z = StateFindZero(current_node->current_state);
@@ -346,63 +394,33 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs, int& 
         int y = z / 3;
 
         // 尝试四个方向移动 '0'
-        bool is_leaf = true; // 标记是否为叶子节点
+        bool  is_leaf = true; // 标记是否为叶子节点
+        State next_state;     // 用于存储新状态
         for(int i = 0; i < 4; ++i)
         {
-            Operate dir = static_cast<Operate>(i);
+            Operate dir = operate(i);
 
-            int nx = 0;
-            int ny = 0;
+            // 如果无法创建新状态
+            if(!_creat_new_state(current_node->current_state, next_state, dir)) continue;
 
-            switch(dir)
+            // 如果新状态未被访问过
+            if(!StateMapSearch(state_map, next_state))
             {
-            case Operate::UP:
-                nx = x;
-                ny = y - 1; // 向上移动
-                break;
-            case Operate::RIGHT:
-                nx = x + 1; // 向右移动
-                ny = y;
-                break;
-            case Operate::DOWN:
-                nx = x;
-                ny = y + 1; // 向下移动
-                break;
-            case Operate::LEFT:
-                nx = x - 1; // 向左移动
-                ny = y;
-                break;
-            }
+                // 创建新节点并设置状态
+                Node next_node;
+                next_node.deep          = current_node->deep + 1;      // 更新步数
+                next_node.current_state = next_state;                  // 更新新状态
+                next_node.last_state    = current_node->current_state; // 记录上一个状态
+                next_node.operate       = dir;                         // 记录操作方向
 
-            // 检查新位置是否在 3x3 网格内
-            if(nx >= 0 && nx < 3 && ny >= 0 && ny < 3)
-            {
-                // 新位置的索引
-                int nz = ny * 3 + nx;
+                // 插入新状态到哈希表
+                Node_ptr new_map_node = StateMapInsert(state_map, next_node);
+                node_count++; // 统计节点数量
 
-                // 生成新状态
-                State next_state = current_node->current_state;
-                StateSwap(next_state, z, nz);
+                // 将新状态入队
+                LinkQueuePushTail(node_queue, new_map_node);
 
-                // 如果新状态未被访问过
-                if(!StateMapSearch(state_map, next_state))
-                {
-                    // 创建新节点并设置状态
-                    Node next_node;
-                    next_node.deep          = current_node->deep + 1;      // 更新步数
-                    next_node.current_state = next_state;                  // 更新新状态
-                    next_node.last_state    = current_node->current_state; // 记录上一个状态
-                    next_node.operate       = dir;                         // 记录操作方向
-
-                    // 插入新状态到哈希表
-                    Node_ptr new_map_node = StateMapInsert(state_map, next_node);
-                    node_count++; // 统计节点数量
-
-                    // 将新状态入队
-                    LinkQueuePushTail(node_queue, new_map_node);
-
-                    is_leaf = false; // 只要有一个子节点，就不是叶子节点
-                }
+                is_leaf = false; // 只要有一个子节点，就不是叶子节点
             }
         }
 

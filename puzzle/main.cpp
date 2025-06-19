@@ -31,19 +31,19 @@ SavePathToFile(const LinkQueue& path, const char* filename)
         Operate dir = current->operate;
         switch(dir)
         {
-        case Operate::UP:
+        case Operate::ZERO_UP:
             fprintf(file, "向下划动:\n");
             break;
-        case Operate::RIGHT:
+        case Operate::ZERO_RIGHT:
             fprintf(file, "向左划动:\n");
             break;
-        case Operate::DOWN:
+        case Operate::ZERO_DOWN:
             fprintf(file, "向上划动:\n");
             break;
-        case Operate::LEFT:
+        case Operate::ZERO_LEFT:
             fprintf(file, "向右划动:\n");
             break;
-        case Operate::NONE:
+        case Operate::ZERO_NONE:
             fprintf(file, "无操作:\n");
             break;
         }

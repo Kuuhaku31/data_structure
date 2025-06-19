@@ -22,32 +22,34 @@ struct State
 // 定义操作方向的枚举类型
 enum Operate
 {
-    UP    = 0,
-    RIGHT = 1,
-    DOWN  = 2,
-    LEFT  = 3,
-    NONE  = 4,
+    ZERO_UP    = 0,
+    ZERO_RIGHT = 1,
+    ZERO_DOWN  = 2,
+    ZERO_LEFT  = 3,
+    ZERO_NONE  = 4,
 };
+
+Operate operate(int dir);
 
 // 节点结构体
 struct Node
 {
-    int deep = 0;                      // 最小步数
+    int deep = 0;                         // 最小步数
 
-    State   current_state;             // 当前状态
-    State   last_state;                // 上一个状态
-    Operate operate = Operate::NONE;   // 操作（移动方向）
+    State   current_state;                // 当前状态
+    State   last_state;                   // 上一个状态
+    Operate operate = Operate::ZERO_NONE; // 操作（移动方向）
 
-    Node_ptr last_list_node = nullptr; // 指向上一个队列节点
-    Node_ptr next_list_node = nullptr; // 指向下一个队列节点
+    Node_ptr last_list_node = nullptr;    // 指向上一个队列节点
+    Node_ptr next_list_node = nullptr;    // 指向下一个队列节点
 
-    Node_ptr last_map_node = nullptr;  // 指向上一个哈希表节点
-    Node_ptr next_map_node = nullptr;  // 指向下一个哈希表节点
+    Node_ptr last_map_node = nullptr;     // 指向上一个哈希表节点
+    Node_ptr next_map_node = nullptr;     // 指向下一个哈希表节点
 };
 
 
 /* 函数声明 */
-
+void     StateCopy(State& dest, const State& src);                                       // 复制状态
 void     StateSet(State& state, const char* str);                                        // 设置状态
 bool     StateEqual(const State& a, const State& b);                                     // 检查两个状态是否相等
 int      StateFindZero(const State& state);                                              // 查找状态中 '0' 的位置
