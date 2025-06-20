@@ -21,7 +21,7 @@ SavePathToFile(const LinkQueue& path, const char* filename)
     // 处理循环队列
     // 从循环队尾开始打印路径
     int               count   = 0;
-    LinkQueueNode_ptr current = path;
+    LinkQueueNode_ptr current = path.queue_front;
     do
     {
         current = current->last; // 向前移动到上一个节点
@@ -55,7 +55,7 @@ SavePathToFile(const LinkQueue& path, const char* filename)
         fprintf(file, "\n");
 
         count++;
-    } while(current != path); // 循环队列
+    } while(current != path.queue_front); // 循环队列
 
     printf("路径已保存到 %s\n", filename);
     fclose(file);
@@ -110,7 +110,7 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
     }
 
     // 处理循环队列
-    LinkQueueNode_ptr current = leafs_queue;
+    LinkQueueNode_ptr current = leafs_queue.queue_front;
     do
     {
         // 将当前状态写入文件
@@ -124,7 +124,7 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
         fprintf(file, "\n");
 
         current = current->last; // 向前移动到上一个节点
-    } while(current != leafs_queue); // 循环队列
+    } while(current != leafs_queue.queue_front); // 循环队列
 
     printf("叶子节点信息已保存到 %s\n", filename);
     fclose(file);
@@ -188,8 +188,8 @@ main(int argc, char* argv[])
     LinkQueue leafs;             // 叶子节点队列
     StateMap  state_map;         // 映射表
 
-    LinkQueueInit(path);         // 初始化路径队列
-    LinkQueueInit(leafs);        // 初始化叶子节点队列
+    // LinkQueueInit(path);         // 初始化路径队列
+    // LinkQueueInit(leafs);        // 初始化叶子节点队列
 
 
     // 处理命令行参数
@@ -251,8 +251,8 @@ main(int argc, char* argv[])
 
     // 清理资源
     {
-        LinkQueueDestroy(path);  // 销毁路径队列
-        LinkQueueDestroy(leafs); // 销毁叶子节点队列
+        // LinkQueueDestroy(path);  // 销毁路径队列
+        // LinkQueueDestroy(leafs); // 销毁叶子节点队列
     }
 
 

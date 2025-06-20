@@ -71,72 +71,77 @@ StateFindZero(const State& state)
 }
 
 
-void
-LinkQueueInit(LinkQueue& q)
+LinkQueue::LinkQueue()
 {
-    q = nullptr; // 初始化为空队列
+    this->queue_front = nullptr; // 初始化为空队列
+    // this->queue_rear  = nullptr; // 初始化为空队列
+    this->size = 0; // 初始化队列大小
 }
 
 
-void
-LinkQueueDestroy(LinkQueue& list)
+LinkQueue::~LinkQueue()
 {
     // 销毁循环队列
-    if(list == nullptr) return;            // 如果队列为空，直接返回
+    if(this->queue_front == nullptr) return;         // 如果队列为空，直接返回
 
-    LinkQueueNode_ptr current   = list;    // 从队头开始遍历
-    LinkQueueNode_ptr next_node = nullptr; // 用于保存下一个节点
+    LinkQueueNode_ptr current   = this->queue_front; // 从队头开始遍历
+    LinkQueueNode_ptr next_node = nullptr;           // 用于保存下一个节点
     do
     {
         next_node = current->next; // 保存下一个节点
         delete current;            // 删除当前节点
         current = next_node;       // 移动到下一个节点
-    } while(current != list); // 循环直到回到队头
+    } while(current != this->queue_front); // 循环直到回到队头
 
-    list = nullptr; // 最后将队列指针置为 nullptr
+    this->queue_front = nullptr; // 最后将队列指针置为 nullptr
+    // this->queue_rear  = nullptr;
 }
 
 
 void
-LinkQueuePushTail(LinkQueue& list, StateNode_ptr new_state_node)
+LinkQueue::LinkQueuePushTail(StateNode_ptr new_state_node)
 {
     LinkQueueNode_ptr new_list_node = new LinkQueueNode(new_state_node); // 创建新的链表节点
 
     // 如果队列为空，初始化新节点为队头和队尾
-    if(list == nullptr)
+    if(this->queue_front == nullptr)
     {
         new_list_node->next = new_list_node; // 新节点指向自己，形成循环
         new_list_node->last = new_list_node; // 新节点的上一个节点指向自己
-        list                = new_list_node; // 将队列指针指向新节点
+        this->queue_front   = new_list_node; // 将队列指针指向新节点
     }
     // 如果队列不为空，将新节点添加到队尾
     else
     {
-        LinkQueueNode_ptr tail = list->last;    // 获取队尾节点
-        tail->next             = new_list_node; // 将新节点添加到队尾
-        new_list_node->last    = tail;          // 新节点的上一个节点指向队尾节点
-        new_list_node->next    = list;          // 新节点的下一个节点指向队头节点
-        list->last             = new_list_node; // 队头节点的上一个节点指向新节点
+        LinkQueueNode_ptr tail  = this->queue_front->last; // 获取队尾节点
+        tail->next              = new_list_node;           // 将新节点添加到队尾
+        new_list_node->last     = tail;                    // 新节点的上一个节点指向队尾节点
+        new_list_node->next     = this->queue_front;       // 新节点的下一个节点指向队头节点
+        this->queue_front->last = new_list_node;           // 队头节点的上一个节点指向新节点
     }
 }
 
 
 StateNode_ptr
-LinkQueuePopHead(LinkQueue& list)
+LinkQueue::LinkQueuePopHead()
 {
-    if(list == nullptr) return nullptr;
+    if(this->queue_front == nullptr) return nullptr;
 
-    LinkQueueNode_ptr front_node       = list;
-    StateNode_ptr     front_state_node = front_node->node;
+    LinkQueueNode_ptr front_node       = this->queue_front;
+    StateNode_ptr     front_state_node = this->queue_front->node;
 
     // 如果队列只有一个节点，直接清空队列
-    if(list->next == list) list = nullptr;
+    if(this->queue_front->next == this->queue_front)
+    {
+        this->queue_front = nullptr;
+        // this->queue_rear  = nullptr;
+    }
     // 如果队列有多个节点
     else
     {
-        list                   = list->next;       // 更新队头后移
-        list->last             = front_node->last; // 更新队头的上一个节点指针
-        front_node->last->next = list;             // 更新队尾指针
+        this->queue_front       = this->queue_front->next; // 更新队头后移
+        this->queue_front->last = front_node->last;        // 更新队头的上一个节点指针
+        front_node->last->next  = this->queue_front;       // 更新队尾指针
     }
 
     delete front_node; // 删除队头节点
@@ -146,9 +151,9 @@ LinkQueuePopHead(LinkQueue& list)
 
 
 bool
-LinkQueueIsEmpty(const LinkQueue& q)
+LinkQueue::LinkQueueIsEmpty() const
 {
-    return q == nullptr; // 如果队列为空，返回 true
+    return this->queue_front == nullptr; // 如果队列为空，返回 true
 }
 
 
@@ -263,7 +268,7 @@ FindPath(const StateMap& state_map, const State& target_state, LinkQueue& path)
     StateNode_ptr path_node = target_node; // 从目标节点开始回溯路径
     while(path_node != nullptr)
     {
-        LinkQueuePushTail(path, path_node);                          // 将当前节点加入路径
+        path.LinkQueuePushTail(path_node);                           // 将当前节点加入路径
         path_node = state_map.StateMapSearch(path_node->last_state); // 回溯到上一个状态
     }
 }
@@ -321,18 +326,18 @@ _create_new_state(const State& current_state, State& new_state, Operate dir)
 void
 BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs)
 {
-    LinkQueue node_queue;      // 队列用于 BFS
-    LinkQueueInit(node_queue); // 初始化队列
+    LinkQueue node_queue; // 队列用于 BFS
+    // LinkQueueInit(node_queue); // 初始化队列
 
     StateNode_ptr start_node_ptr = nullptr;
     state_map.StateMapInsert(start_node_ptr, start_state); // 插入初始状态到哈希表
-    LinkQueuePushTail(node_queue, start_node_ptr);         // 将初始状态入队
+    node_queue.LinkQueuePushTail(start_node_ptr);          // 将初始状态入队
 
     // 开始 BFS 搜索
-    while(!LinkQueueIsEmpty(node_queue))
+    while(!node_queue.LinkQueueIsEmpty())
     {
         // 当前状态出队
-        StateNode_ptr current_node = LinkQueuePopHead(node_queue);
+        StateNode_ptr current_node = node_queue.LinkQueuePopHead();
 
         // 尝试四个方向移动 '0'
         bool is_leaf = true;
@@ -354,15 +359,15 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs)
                 new_map_node->operate       = dir;                         // 记录操作方向
 
                 // 将新状态入队
-                LinkQueuePushTail(node_queue, new_map_node);
+                node_queue.LinkQueuePushTail(new_map_node);
 
                 is_leaf = false; // 只要有一个子节点，就不是叶子节点
             }
         }
         if(is_leaf)
         {
-            LinkQueuePushTail(leafs, current_node); // 将当前节点添加到叶子节点队列
-            state_map.leaf_count++;                 // 更新叶子节点数量
+            leafs.LinkQueuePushTail(current_node); // 将当前节点添加到叶子节点队列
+            state_map.leaf_count++;                // 更新叶子节点数量
         }
     }
 

@@ -12,7 +12,7 @@ typedef struct LinkQueueNode LinkQueueNode; // 链式队列节点
 
 typedef StateNode*     StateNode_ptr;       // 节点指针
 typedef LinkQueueNode* LinkQueueNode_ptr;   // 链式队列节点指针
-typedef LinkQueueNode* LinkQueue;           // 链式队列
+// typedef LinkQueueNode* LinkQueue;           // 链式队列
 
 
 // 3x3 状态数组
@@ -56,6 +56,22 @@ struct LinkQueueNode
 };
 
 
+struct LinkQueue
+{
+    LinkQueue();
+    ~LinkQueue();
+
+    LinkQueueNode_ptr queue_front = nullptr; // 队列头指针
+    // LinkQueueNode_ptr queue_rear  = nullptr;                 // 队列尾指针
+
+    int size = 0;                                            // 队列大小
+
+    void          LinkQueuePushTail(StateNode_ptr res_node); // 入队操作
+    StateNode_ptr LinkQueuePopHead();                        // 出队操作
+    bool          LinkQueueIsEmpty() const;                  // 检查队列是否为空
+};
+
+
 struct StateMap
 {
     StateMap();
@@ -79,15 +95,9 @@ struct StateMap
 
 /* 函数声明 */
 
-void StateCopy(State& dest, const State& src);                            // 复制状态
-void StateSet(State& state, const char* str);                             // 设置状态
-bool StateEqual(const State& a, const State& b);                          // 检查两个状态是否相等
-
-void          LinkQueueInit(LinkQueue& list);                             // 初始化队列
-void          LinkQueueDestroy(LinkQueue& list);                          // 销毁队列
-void          LinkQueuePushTail(LinkQueue& list, StateNode_ptr res_node); // 入队操作
-StateNode_ptr LinkQueuePopHead(LinkQueue& list);                          // 出队操作
-bool          LinkQueueIsEmpty(const LinkQueue& list);                    // 检查队列是否为空
+void StateCopy(State& dest, const State& src);   // 复制状态
+void StateSet(State& state, const char* str);    // 设置状态
+bool StateEqual(const State& a, const State& b); // 检查两个状态是否相等
 
 
 /* Build Tree */
