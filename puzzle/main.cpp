@@ -5,6 +5,52 @@
 
 #include <ctime>
 #include <stdio.h>
+#include <string>
+
+
+std::string
+state_to_str(const State& state)
+{
+    std::string str;
+    for(int i = 0; i < 9; ++i) str += state.data[i];
+    return str;
+}
+
+
+/*
+解析成形如：
+| 1 | 5 | 2 |
+| 0 | 4 | 3 |
+| 7 | 8 | 6 |
+*/
+std::string
+prase_state(const State& state)
+{
+    std::string res = "";
+    for(int i = 0; i < 9; ++i)
+    {
+        res += "| ";
+        res += state.data[i];
+        res += " ";
+        if(i % 3 == 2) res += "|\n";
+    }
+    return res;
+}
+
+
+std::string
+prase_operate_dir(Operate dir)
+{
+    switch(dir)
+    {
+    case Operate::ZERO_UP: return "向下滑动";
+    case Operate::ZERO_RIGHT: return "向左划动";
+    case Operate::ZERO_DOWN: return "向上划动";
+    case Operate::ZERO_LEFT: return "向右划动";
+    case Operate::ZERO_NONE: return "无操作";
+    default: return "未知操作";
+    }
+}
 
 
 // 保存解法到文件
@@ -28,30 +74,12 @@ SavePathToFile(const LinkQueue& path, const char* filename)
 
         // 将当前状态写入文件
         fprintf(file, "第 %d 步:\n", current->node->deep);
-        Operate dir = current->node->operate;
-        switch(dir)
-        {
-        case Operate::ZERO_UP:
-            fprintf(file, "向下划动:\n");
-            break;
-        case Operate::ZERO_RIGHT:
-            fprintf(file, "向左划动:\n");
-            break;
-        case Operate::ZERO_DOWN:
-            fprintf(file, "向上划动:\n");
-            break;
-        case Operate::ZERO_LEFT:
-            fprintf(file, "向右划动:\n");
-            break;
-        case Operate::ZERO_NONE:
-            fprintf(file, "无操作:\n");
-            break;
-        }
-        for(int i = 0; i < 9; ++i)
-        {
-            fprintf(file, "| %c ", current->node->current_state.data[i]);
-            if(i % 3 == 2) fprintf(file, "|\n"); // 每三列换行
-        }
+
+        std::string dir_str = prase_operate_dir(current->node->operate);
+        fprintf(file, (dir_str + ":\n").c_str());
+        std::string res = prase_state(current->node->current_state);
+        fprintf(file, res.c_str());
+
         fprintf(file, "\n");
 
         count++;
@@ -134,10 +162,6 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
 void
 PrintStateMapInfo(const StateMap& state_map)
 {
-    printf("\n=== 状态映射信息 ===\n");
-    printf("总节点数: %d\n", state_map.node_count);
-    printf("叶子节点数: %d\n", state_map.leaf_count);
-
     int zero_count = 0;    // 空的哈希桶的数量
 
     double average  = 0.0; // 平均每个哈希桶的节点数
@@ -165,12 +189,16 @@ PrintStateMapInfo(const StateMap& state_map)
     }
     variance /= HASH_SIZE;
 
-    printf("哈希桶总数: %d\n", HASH_SIZE);
-    printf("空的哈希桶数量: %d\n", zero_count);
-    printf("哈希桶利用率: %.2f%%\n", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
-    printf("平均每个哈希桶节点数: %.2f\n", average);
-    printf("哈希桶节点数方差: %.2f\n", variance);
-    printf("=== 状态映射信息结束 ===\n\n");
+    std::string title = "========= 状态映射信息 =========";
+    printf("\n%s\n", title.c_str());
+    printf("总节点数:               %d\n", state_map.node_count);
+    printf("叶子节点数:             %d\n", state_map.leaf_count);
+    printf("哈希桶总数:             %d\n", HASH_SIZE);
+    printf("空的哈希桶数量:         %d\n", zero_count);
+    printf("哈希桶利用率:           %.2f%%\n", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
+    printf("平均每个哈希桶节点数:   %.2f\n", average);
+    printf("哈希桶节点数方差:       %.2f\n", variance);
+    printf("%s\n\n", title.c_str());
 }
 
 
@@ -178,7 +206,7 @@ PrintStateMapInfo(const StateMap& state_map)
 int
 main(int argc, char* argv[])
 {
-    printf("3x3 拼图求解器\n\n");
+    printf("\033[1;32m3x3 拼图求解器\033[0m\n\n");
 
     bool need_find_path = false; // 是否需要查找路径
 
@@ -187,9 +215,6 @@ main(int argc, char* argv[])
     LinkQueue path;              // 路径队列
     LinkQueue leafs;             // 叶子节点队列
     StateMap  state_map;         // 映射表
-
-    // LinkQueueInit(path);         // 初始化路径队列
-    // LinkQueueInit(leafs);        // 初始化叶子节点队列
 
 
     // 处理命令行参数
@@ -203,15 +228,15 @@ main(int argc, char* argv[])
 
         case 2: // 仅构建映射表，根据 argv[1] 为根状态
             root_state.StateSet(argv[1]);
-            printf("使用根状态: %s\n", argv[1]);
+            printf("根状态:\n%s", prase_state(root_state).c_str());
             break;
 
         default: // 构建映射表，然后根据 argv[2] 查找路径
             root_state.StateSet(argv[1]);
             target_state.StateSet(argv[2]);
             need_find_path = true;
-            printf("使用根状态: %s\n", argv[1]);
-            printf("目标状态: %s\n", argv[2]);
+            printf("根状态:\n%s\n", prase_state(root_state).c_str());
+            printf("目标状态:\n%s\n", prase_state(target_state).c_str());
             break;
         }
     }
@@ -246,13 +271,6 @@ main(int argc, char* argv[])
         printf("开始查找从根状态到目标状态的路径...\n");
         FindPath(state_map, target_state, path); // 从状态映射中找到路径
         SavePathToFile(path, "path.txt");        // 保存路径到文件
-    }
-
-
-    // 清理资源
-    {
-        // LinkQueueDestroy(path);  // 销毁路径队列
-        // LinkQueueDestroy(leafs); // 销毁叶子节点队列
     }
 
 
