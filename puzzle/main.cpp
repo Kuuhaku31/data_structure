@@ -190,7 +190,6 @@ main(int argc, char* argv[])
 
     LinkQueueInit(path);         // 初始化路径队列
     LinkQueueInit(leafs);        // 初始化叶子节点队列
-    StateMapInit(state_map);     // 初始化状态映射表
 
 
     // 处理命令行参数
@@ -252,9 +251,8 @@ main(int argc, char* argv[])
 
     // 清理资源
     {
-        LinkQueueDestroy(path);     // 销毁路径队列
-        LinkQueueDestroy(leafs);    // 销毁叶子节点队列
-        StateMapDestroy(state_map); // 销毁状态映射
+        LinkQueueDestroy(path);  // 销毁路径队列
+        LinkQueueDestroy(leafs); // 销毁叶子节点队列
     }
 
 

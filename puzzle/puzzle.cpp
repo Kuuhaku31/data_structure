@@ -153,7 +153,7 @@ LinkQueueIsEmpty(const LinkQueue& q)
 
 
 unsigned
-StateMapHash(const State& state)
+StateMap::StateMapHash(const State& state) const
 {
     unsigned hash_value = 0;
     for(char c : state.data)
@@ -164,26 +164,26 @@ StateMapHash(const State& state)
 }
 
 
-void
-StateMapInit(StateMap& state_map)
+StateMap::StateMap()
 {
     // 分配指针数组内存
     for(int i = 0; i < HASH_SIZE; ++i)
     {
-        state_map.map[i].node_ptr   = nullptr; // 初始化每个指针为 nullptr
-        state_map.map[i].node_count = 0;       // 初始化每个哈希桶的节点数量为 0
+        this->map[i].node_ptr   = nullptr; // 初始化每个指针为 nullptr
+        this->map[i].node_count = 0;       // 初始化每个哈希桶的节点数量为 0
     }
 }
 
 
-void
-StateMapDestroy(StateMap& state_map)
+StateMap::~StateMap()
 {
+    StateNode_ptr temp    = nullptr;
+    StateNode_ptr current = nullptr;
+
     // 遍历每个链表，释放节点内存
     for(int i = 0; i < HASH_SIZE; ++i)
     {
-        StateNode_ptr temp    = nullptr;
-        StateNode_ptr current = state_map.map[i].node_ptr;
+        current = this->map[i].node_ptr;
         while(current)
         {
             temp    = current;
@@ -193,18 +193,19 @@ StateMapDestroy(StateMap& state_map)
     }
 }
 
+
 /*
 ### 查找状态
 如果找到匹配的状态，返回指向该状态节点的指针
 如果未找到匹配的状态，返回 `nullptr`
 */
 StateNode_ptr
-StateMapSearch(const StateMap& state_map, const State& state)
+StateMap::StateMapSearch(const State& state) const
 {
     unsigned index = StateMapHash(state); // 计算哈希值
 
     // 遍历链表查找状态
-    StateNode_ptr current = state_map.map[index].node_ptr;
+    StateNode_ptr current = this->map[index].node_ptr;
     while(current)
     {
         if(StateEqual(current->current_state, state)) return current; // 找到匹配的状态
@@ -221,14 +222,14 @@ StateMapSearch(const StateMap& state_map, const State& state)
 并且把新节点指针赋值给 `node_ptr`
 */
 bool
-StateMapInsert(StateMap& state_map, StateNode_ptr& node_ptr, const State& state)
+StateMap::StateMapInsert(StateNode_ptr& node_ptr, const State& state)
 {
     unsigned index = StateMapHash(state); // 计算哈希值
 
     // 检查是否已存在相同状态
     // 如果已存在相同状态，直接返回
     bool found = false;
-    node_ptr   = state_map.map[index].node_ptr;
+    node_ptr   = this->map[index].node_ptr;
     while(node_ptr)
     {
         if(StateEqual(node_ptr->current_state, state)) // 比较当前状态
@@ -238,15 +239,15 @@ StateMapInsert(StateMap& state_map, StateNode_ptr& node_ptr, const State& state)
         }
         node_ptr = node_ptr->next_map_node;
     }
-    if(found) return false;                                            // 如果已存在相同状态，返回 false
-    else                                                               // 如果不存在相同状态，则创建新节点并插入到哈希表中
+    if(found) return false;                                    // 如果已存在相同状态，返回 false
+    else                                                       // 如果不存在相同状态，则创建新节点并插入到哈希表中
     {
-        node_ptr                      = new StateNode(state);          // 创建新节点
-        node_ptr->next_map_node       = state_map.map[index].node_ptr; // 新节点指向当前链表头
-        state_map.map[index].node_ptr = node_ptr;                      // 更新链表头为新节点
+        node_ptr                  = new StateNode(state);      // 创建新节点
+        node_ptr->next_map_node   = this->map[index].node_ptr; // 新节点指向当前链表头
+        this->map[index].node_ptr = node_ptr;                  // 更新链表头为新节点
 
-        state_map.map[index].node_count++;                             // 统计节点数量
-        state_map.node_count++;                                        // 更新总节点数量
+        this->map[index].node_count++;                         // 统计节点数量
+        this->node_count++;                                    // 更新总节点数量
         return true;
     }
 }
@@ -255,15 +256,15 @@ StateMapInsert(StateMap& state_map, StateNode_ptr& node_ptr, const State& state)
 void
 FindPath(const StateMap& state_map, const State& target_state, LinkQueue& path)
 {
-    StateNode_ptr target_node = StateMapSearch(state_map, target_state); // 查找目标状态节点
-    if(!target_node) return;                                             // 如果目标状态不存在，直接返回
+    StateNode_ptr target_node = state_map.StateMapSearch(target_state); // 查找目标状态节点
+    if(!target_node) return;                                            // 如果目标状态不存在，直接返回
 
     // 从目标状态向前回溯路径
     StateNode_ptr path_node = target_node; // 从目标节点开始回溯路径
     while(path_node != nullptr)
     {
-        LinkQueuePushTail(path, path_node);                           // 将当前节点加入路径
-        path_node = StateMapSearch(state_map, path_node->last_state); // 回溯到上一个状态
+        LinkQueuePushTail(path, path_node);                          // 将当前节点加入路径
+        path_node = state_map.StateMapSearch(path_node->last_state); // 回溯到上一个状态
     }
 }
 
@@ -324,8 +325,8 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs)
     LinkQueueInit(node_queue); // 初始化队列
 
     StateNode_ptr start_node_ptr = nullptr;
-    StateMapInsert(state_map, start_node_ptr, start_state); // 插入初始状态到哈希表
-    LinkQueuePushTail(node_queue, start_node_ptr);          // 将初始状态入队
+    state_map.StateMapInsert(start_node_ptr, start_state); // 插入初始状态到哈希表
+    LinkQueuePushTail(node_queue, start_node_ptr);         // 将初始状态入队
 
     // 开始 BFS 搜索
     while(!LinkQueueIsEmpty(node_queue))
@@ -344,7 +345,7 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs)
 
             // 如果新状态未被访问过
             StateNode_ptr new_map_node = nullptr;
-            if(StateMapInsert(state_map, new_map_node, next_state))
+            if(state_map.StateMapInsert(new_map_node, next_state))
             {
                 // 创建新节点并设置状态
                 new_map_node->deep          = current_node->deep + 1;      // 更新步数

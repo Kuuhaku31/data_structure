@@ -58,14 +58,22 @@ struct LinkQueueNode
 
 struct StateMap
 {
+    StateMap();
+    ~StateMap();
+
     struct
     {
-        StateNode_ptr node_ptr;
+        StateNode_ptr node_ptr;   // 指向哈希桶中的第一个状态节点
         int           node_count; // 这个哈希桶中存储的节点数量
     } map[HASH_SIZE];             // 哈希表，存储状态节点指针
 
     int node_count = 0;           // 当前节点数量
     int leaf_count = 0;           // 当前叶子节点数量
+
+
+    StateNode_ptr StateMapSearch(const State& state) const; // 查找状态
+    unsigned      StateMapHash(const State& state) const;   // 哈希函数
+    bool          StateMapInsert(StateNode_ptr& node_ptr, const State& state);
 };
 
 
@@ -80,12 +88,6 @@ void          LinkQueueDestroy(LinkQueue& list);                          // 销
 void          LinkQueuePushTail(LinkQueue& list, StateNode_ptr res_node); // 入队操作
 StateNode_ptr LinkQueuePopHead(LinkQueue& list);                          // 出队操作
 bool          LinkQueueIsEmpty(const LinkQueue& list);                    // 检查队列是否为空
-
-void          StateMapInit(StateMap& map);                                // 初始化状态映射
-void          StateMapDestroy(StateMap& map);                             // 销毁状态映射
-StateNode_ptr StateMapSearch(const StateMap& map, const State& state);    // 查找状态
-unsigned      StateMapHash(const State& state);                           // 哈希函数
-bool          StateMapInsert(StateMap& map, StateNode_ptr& node_ptr, const State& state);
 
 
 /* Build Tree */
