@@ -4,26 +4,12 @@
 #include "header.h"
 
 
-Operate
-int_to_operate(int dir)
-{
-    switch(dir)
-    {
-    case 0: return Operate::ZERO_UP;
-    case 1: return Operate::ZERO_RIGHT;
-    case 2: return Operate::ZERO_DOWN;
-    case 3: return Operate::ZERO_LEFT;
-    default: return Operate::ZERO_NONE; // 默认返回 NONE
-    }
-}
-
-
 StateNode::StateNode(const State& state)
     : deep(0)
     , operate(Operate::ZERO_NONE)
     , next_map_node(nullptr)
 {
-    StateCopy(current_state, state);
+    current_state.StateCopy(state);
 }
 
 
@@ -36,27 +22,27 @@ LinkQueueNode::LinkQueueNode(StateNode_ptr ptr)
 
 
 void
-StateCopy(State& dest, const State& src)
+State::StateCopy(const State& src)
 {
-    for(int i = 0; i < 9; ++i) dest.data[i] = src.data[i]; // 逐个复制状态数组中的字符
+    for(int i = 0; i < 9; ++i) this->data[i] = src.data[i]; // 逐个复制状态数组中的字符
 }
 
 
 void
-StateSet(State& state, const char* str)
+State::StateSet(const char* str)
 {
-    for(int i = 0; i < 9; ++i) state.data[i] = str[i];
+    for(int i = 0; i < 9; ++i) this->data[i] = str[i];
 }
 
 
 bool
-StateEqual(const State& a, const State& b)
+State::StateEqual(const State& a)
 {
     for(int i = 0; i < 9; ++i)
     {
-        if(a.data[i] != b.data[i]) return false; // 如果有任何一个字符不相等，返回 false
+        if(this->data[i] != a.data[i]) return false; // 如果有任何一个字符不相等，返回 false
     }
-    return true;                                 // 所有字符都相等，返回 true
+    return true;                                     // 所有字符都相等，返回 true
 }
 
 
@@ -213,8 +199,8 @@ StateMap::StateMapSearch(const State& state) const
     StateNode_ptr current = this->map[index].node_ptr;
     while(current)
     {
-        if(StateEqual(current->current_state, state)) return current; // 找到匹配的状态
-        current = current->next_map_node;                             // 移动到下一个节点
+        if(current->current_state.StateEqual(state)) return current; // 找到匹配的状态
+        current = current->next_map_node;                            // 移动到下一个节点
     }
     // 如果遍历完链表都没有找到匹配的状态，返回 nullptr
     return nullptr;
@@ -237,7 +223,7 @@ StateMap::StateMapInsert(StateNode_ptr& node_ptr, const State& state)
     node_ptr   = this->map[index].node_ptr;
     while(node_ptr)
     {
-        if(StateEqual(node_ptr->current_state, state)) // 比较当前状态
+        if(node_ptr->current_state.StateEqual(state)) // 比较当前状态
         {
             found = true;
             break;
@@ -313,7 +299,7 @@ _create_new_state(const State& current_state, State& new_state, Operate dir)
         int nz = y * 3 + x;
 
         // 生成新状态
-        StateCopy(new_state, current_state); // 复制当前状态
+        new_state.StateCopy(current_state); // 复制当前状态
         // 交换 '0' 和新位置的值
         char temp          = new_state.data[z];
         new_state.data[z]  = new_state.data[nz];
@@ -344,7 +330,7 @@ BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs)
         for(int i = 0; i < 4; ++i)
         {
             // 如果无法创建新状态
-            Operate dir = int_to_operate(i);
+            Operate dir = (Operate)i;
             State   next_state;
             if(!_create_new_state(current_node->current_state, next_state, dir)) continue;
 

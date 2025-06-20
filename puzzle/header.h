@@ -9,17 +9,26 @@
 
 typedef struct StateNode     StateNode;     // 节点
 typedef struct LinkQueueNode LinkQueueNode; // 链式队列节点
+typedef struct LinkQueue     LinkQueue;     // 链式队列
+typedef struct StateMap      StateMap;      // 状态映射
 
 typedef StateNode*     StateNode_ptr;       // 节点指针
 typedef LinkQueueNode* LinkQueueNode_ptr;   // 链式队列节点指针
-// typedef LinkQueueNode* LinkQueue;           // 链式队列
 
 
 // 3x3 状态数组
 struct State
 {
-    char data[9] = { 0 }; // 3x3 状态数组
+    State()  = default;
+    ~State() = default;
+
+    char data[9] = { 0 };             // 3x3 状态数组
+
+    void StateCopy(const State& src); // 复制状态
+    void StateSet(const char* str);   // 设置状态
+    bool StateEqual(const State& a);  // 检查两个状态是否相等
 };
+
 
 // 定义操作方向的枚举类型
 enum Operate
@@ -31,13 +40,11 @@ enum Operate
     ZERO_NONE  = 4,
 };
 
-// 将整数转换为操作方向
-Operate int_to_operate(int dir);
 
-// 节点结构体
 struct StateNode
 {
     StateNode(const State& state);
+    ~StateNode() = default;
 
     int           deep;          // 最小步数
     State         current_state; // 当前状态
@@ -46,9 +53,11 @@ struct StateNode
     StateNode_ptr next_map_node; // 指向下一个哈希表节点
 };
 
+
 struct LinkQueueNode
 {
     LinkQueueNode(StateNode_ptr ptr);
+    ~LinkQueueNode() = default;
 
     StateNode_ptr     node; // 指向状态节点
     LinkQueueNode_ptr last; // 指向上一个队列节点
@@ -61,10 +70,8 @@ struct LinkQueue
     LinkQueue();
     ~LinkQueue();
 
-    LinkQueueNode_ptr queue_front = nullptr; // 队列头指针
-    // LinkQueueNode_ptr queue_rear  = nullptr;                 // 队列尾指针
-
-    int size = 0;                                            // 队列大小
+    LinkQueueNode_ptr queue_front = nullptr;                 // 队列头指针
+    int               size        = 0;                       // 队列大小
 
     void          LinkQueuePushTail(StateNode_ptr res_node); // 入队操作
     StateNode_ptr LinkQueuePopHead();                        // 出队操作
@@ -79,25 +86,17 @@ struct StateMap
 
     struct
     {
-        StateNode_ptr node_ptr;   // 指向哈希桶中的第一个状态节点
-        int           node_count; // 这个哈希桶中存储的节点数量
-    } map[HASH_SIZE];             // 哈希表，存储状态节点指针
+        StateNode_ptr node_ptr;                                                // 指向哈希桶中的第一个状态节点
+        int           node_count;                                              // 这个哈希桶中存储的节点数量
+    } map[HASH_SIZE];                                                          // 哈希表，存储状态节点指针
 
-    int node_count = 0;           // 当前节点数量
-    int leaf_count = 0;           // 当前叶子节点数量
+    int node_count = 0;                                                        // 当前节点数量
+    int leaf_count = 0;                                                        // 当前叶子节点数量
 
-
-    StateNode_ptr StateMapSearch(const State& state) const; // 查找状态
-    unsigned      StateMapHash(const State& state) const;   // 哈希函数
-    bool          StateMapInsert(StateNode_ptr& node_ptr, const State& state);
+    StateNode_ptr StateMapSearch(const State& state) const;                    // 查找状态
+    unsigned      StateMapHash(const State& state) const;                      // 哈希函数
+    bool          StateMapInsert(StateNode_ptr& node_ptr, const State& state); // 插入
 };
-
-
-/* 函数声明 */
-
-void StateCopy(State& dest, const State& src);   // 复制状态
-void StateSet(State& state, const char* str);    // 设置状态
-bool StateEqual(const State& a, const State& b); // 检查两个状态是否相等
 
 
 /* Build Tree */

@@ -197,18 +197,18 @@ main(int argc, char* argv[])
         switch(argc)
         {
         case 1: // 仅构建映射表，默认 123456780 为根状态
-            StateSet(root_state, "123456780");
+            root_state.StateSet("123456780");
             printf("未指定目标状态，使用默认根状态 123456780\n");
             break;
 
         case 2: // 仅构建映射表，根据 argv[1] 为根状态
-            StateSet(root_state, argv[1]);
+            root_state.StateSet(argv[1]);
             printf("使用根状态: %s\n", argv[1]);
             break;
 
         default: // 构建映射表，然后根据 argv[2] 查找路径
-            StateSet(root_state, argv[1]);
-            StateSet(target_state, argv[2]);
+            root_state.StateSet(argv[1]);
+            target_state.StateSet(argv[2]);
             need_find_path = true;
             printf("使用根状态: %s\n", argv[1]);
             printf("目标状态: %s\n", argv[2]);
