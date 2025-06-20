@@ -98,7 +98,8 @@ SavePathToFile(const LinkQueue& path, const char* filename)
         count++;
     } while(current != path.queue_front); // 循环队列
 
-    printf("路径已保存到 %s\n", filename);
+    printf("\033[1;32m[文件保存]: \033[0m");
+    printf("已将 路径信息 保存到 %s\n", filename);
     fclose(file);
 }
 
@@ -134,7 +135,8 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
         fprintf(file, "[NULL]\n");
     }
 
-    printf("状态映射已保存到 %s\n", filename);
+    printf("\033[1;32m[文件保存]: \033[0m");
+    printf("已将 状态映射信息 保存到 %s\n", filename);
     fclose(file);
 }
 
@@ -167,7 +169,8 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
         current = current->last; // 向前移动到上一个节点
     } while(current != leafs_queue.queue_front); // 循环队列
 
-    printf("叶子节点信息已保存到 %s\n", filename);
+    printf("\033[1;32m[文件保存]: \033[0m");
+    printf("已将 叶子节点信息 保存到 %s\n", filename);
     fclose(file);
 }
 
@@ -216,15 +219,16 @@ PrintStateMapInfo(const StateMap& state_map)
 
     std::string title = "\033[1;34m========= 状态映射信息 =========\033[0m";
     printf("\n%s", title.c_str());
-    printf("\033[46m\n");
-    printf("总共的可能局面数（9!）: %d\n", 362880); // 9! = 362880
-    printf("总节点数:               %d\n", state_map.node_count);
-    printf("叶子节点数:             %d\n", state_map.leaf_count);
-    printf("哈希桶总数:             %d\n", HASH_SIZE);
-    printf("空的哈希桶数量:         %d\n", zero_count);
-    printf("哈希桶利用率:           %.2f%%\n", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
-    printf("平均每个哈希桶节点数:   %.2f\n", average);
-    printf("哈希桶节点数方差:       %.2f", variance);
+    printf("\033[46m");
+    printf("\n哈希桶总数:             %d", HASH_SIZE);
+    printf("\n空的哈希桶数量:         %d", zero_count);
+    printf("\n哈希桶利用率:           %.2f%%", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
+    printf("\n平均每个哈希桶节点数:   %.2f", average);
+    printf("\n哈希桶节点数方差:       %.2f", variance);
+    printf("\n总共的可能局面数（9!）: %d", 362880); // 9! = 362880
+    printf("\n总节点数:               %d", state_map.node_count);
+    printf("\n叶子节点数:             %d", state_map.leaf_count);
+    printf("\n最大深度:               %d", max_deep);
     printf("\033[0m\n");
     printf("%s\n\n", title.c_str());
 }
