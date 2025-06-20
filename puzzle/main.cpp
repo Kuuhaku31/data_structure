@@ -38,6 +38,19 @@ prase_state(const State& state)
 }
 
 
+void
+print_state(const State& state)
+{
+    printf("\033[1;32;47m");
+    for(int i = 0; i < 9; ++i)
+    {
+        printf("| %c ", state.data[i]);
+        if(i % 3 == 2) printf("|\033[0m\n\033[1;32;47m");
+    }
+    printf("\033[0m\n");
+}
+
+
 std::string
 prase_operate_dir(Operate dir)
 {
@@ -163,6 +176,7 @@ void
 PrintStateMapInfo(const StateMap& state_map)
 {
     int zero_count = 0;    // 空的哈希桶的数量
+    int max_deep   = 0;    // 最大深度
 
     double average  = 0.0; // 平均每个哈希桶的节点数
     double variance = 0.0; // 方差
@@ -175,6 +189,17 @@ PrintStateMapInfo(const StateMap& state_map)
         else
         {
             zero_count++; // 统计空的哈希桶数量
+        }
+
+        // 遍历每个哈希桶，找到最大深度
+        StateNode_ptr current = state_map.map[i].node_ptr;
+        while(current)
+        {
+            if(current->deep > max_deep)
+            {
+                max_deep = current->deep;
+            }
+            current = current->next_map_node;
         }
     }
     average /= HASH_SIZE;
@@ -189,15 +214,18 @@ PrintStateMapInfo(const StateMap& state_map)
     }
     variance /= HASH_SIZE;
 
-    std::string title = "========= 状态映射信息 =========";
-    printf("\n%s\n", title.c_str());
+    std::string title = "\033[1;34m========= 状态映射信息 =========\033[0m";
+    printf("\n%s", title.c_str());
+    printf("\033[46m\n");
+    printf("总共的可能局面数（9!）: %d\n", 362880); // 9! = 362880
     printf("总节点数:               %d\n", state_map.node_count);
     printf("叶子节点数:             %d\n", state_map.leaf_count);
     printf("哈希桶总数:             %d\n", HASH_SIZE);
     printf("空的哈希桶数量:         %d\n", zero_count);
     printf("哈希桶利用率:           %.2f%%\n", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
     printf("平均每个哈希桶节点数:   %.2f\n", average);
-    printf("哈希桶节点数方差:       %.2f\n", variance);
+    printf("哈希桶节点数方差:       %.2f", variance);
+    printf("\033[0m\n");
     printf("%s\n\n", title.c_str());
 }
 
@@ -223,20 +251,29 @@ main(int argc, char* argv[])
         {
         case 1: // 仅构建映射表，默认 123456780 为根状态
             root_state.StateSet("123456780");
+
             printf("未指定目标状态，使用默认根状态 123456780\n");
+
             break;
 
         case 2: // 仅构建映射表，根据 argv[1] 为根状态
             root_state.StateSet(argv[1]);
-            printf("根状态:\n%s", prase_state(root_state).c_str());
+
+            printf("根状态:\n");
+            print_state(root_state);
+
             break;
 
         default: // 构建映射表，然后根据 argv[2] 查找路径
             root_state.StateSet(argv[1]);
             target_state.StateSet(argv[2]);
             need_find_path = true;
-            printf("根状态:\n%s\n", prase_state(root_state).c_str());
-            printf("目标状态:\n%s\n", prase_state(target_state).c_str());
+
+            printf("根状态:\n");
+            print_state(root_state);
+            printf("\n目标状态:\n");
+            print_state(target_state);
+
             break;
         }
     }
