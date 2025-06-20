@@ -240,6 +240,7 @@ main(int argc, char* argv[])
 {
     printf("\033[1;32m3x3 拼图求解器\033[0m\n\n");
 
+
     bool need_find_path = false; // 是否需要查找路径
 
     State     root_state;        // 根状态
@@ -311,6 +312,7 @@ main(int argc, char* argv[])
     {
         printf("开始查找从根状态到目标状态的路径...\n");
         FindPath(state_map, target_state, path); // 从状态映射中找到路径
+        printf("查找完成，路径长度为 %d\n", path.size);
         SavePathToFile(path, "path.txt");        // 保存路径到文件
     }
 

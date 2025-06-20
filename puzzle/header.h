@@ -103,7 +103,7 @@ struct StateMap
 
 /*
 ### 构建状态树
-使用广度优先搜索（BFS）算法从起始状态（1234567890）到所有可能的目标状态
+使用广度优先搜索（BFS）算法搜索从起始状态到所有可能的目标状态
 参数：
   - `start`: 起始状态
   - `state_map`: 状态映射，用于存储已访问的状态
@@ -114,7 +114,7 @@ struct StateMap
 void BuildTree(const State& start_state, StateMap& state_map, LinkQueue& leafs);
 
 /*
-### 利用 BFS 算法构建状态树
+### 利用建状态树搜索路径
 参数：
  - `state_map`: 状态映射，用于存储已访问的状态
  - `target_state`: 目标状态

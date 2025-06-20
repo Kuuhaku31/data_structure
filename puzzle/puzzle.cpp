@@ -105,6 +105,8 @@ LinkQueue::LinkQueuePushTail(StateNode_ptr new_state_node)
         new_list_node->next     = this->queue_front;       // 新节点的下一个节点指向队头节点
         this->queue_front->last = new_list_node;           // 队头节点的上一个节点指向新节点
     }
+
+    this->size++; // 队列大小加 1
 }
 
 
