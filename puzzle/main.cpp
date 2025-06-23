@@ -70,10 +70,18 @@ prase_operate_dir(Operate dir)
 void
 SavePathToFile(const LinkQueue& path, const char* filename)
 {
+    printf("\033[1;32m[文件保存]: \033[0m");
+
+    if(path.size <= 0)
+    {
+        printf("\033[1;33m路径队列为空，无法保存。\n\033[0m");
+        return;
+    }
+
     FILE* file = fopen(filename, "w");
     if(!file)
     {
-        printf("无法打开文件 %s 进行写入。\n", filename);
+        printf("\033[1;31m无法打开文件 %s 进行写入。\n\033[0m", filename);
         return;
     }
 
@@ -98,9 +106,8 @@ SavePathToFile(const LinkQueue& path, const char* filename)
         count++;
     } while(current != path.queue_front); // 循环队列
 
-    printf("\033[1;32m[文件保存]: \033[0m");
-    printf("已将 路径信息 保存到 %s\n", filename);
     fclose(file);
+    printf("已将 路径信息 保存到 %s\n", filename);
 }
 
 
@@ -108,10 +115,18 @@ SavePathToFile(const LinkQueue& path, const char* filename)
 void
 SaveMapToFile(const StateMap& state_map, const char* filename)
 {
+    printf("\033[1;32m[文件保存]: \033[0m");
+
+    if(state_map.node_count <= 0)
+    {
+        printf("\033[1;33m状态映射表为空，无法保存。\n\033[0m");
+        return;
+    }
+
     FILE* file = fopen(filename, "w");
     if(!file)
     {
-        printf("无法打开文件 %s 进行写入。\n", filename);
+        printf("\033[1;31m无法打开文件 %s 进行写入。\n\033[0m", filename);
         return;
     }
 
@@ -135,9 +150,8 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
         fprintf(file, "[NULL]\n");
     }
 
-    printf("\033[1;32m[文件保存]: \033[0m");
-    printf("已将 状态映射信息 保存到 %s\n", filename);
     fclose(file);
+    printf("已将 状态映射信息 保存到 %s\n", filename);
 }
 
 
@@ -145,10 +159,18 @@ SaveMapToFile(const StateMap& state_map, const char* filename)
 void
 SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
 {
+    printf("\033[1;32m[文件保存]: \033[0m");
+
+    if(leafs_queue.size <= 0)
+    {
+        printf("\033[1;33m叶子节点队列为空，无法保存。\n\033[0m");
+        return;
+    }
+
     FILE* file = fopen(filename, "w");
     if(!file)
     {
-        printf("无法打开文件 %s 进行写入。\n", filename);
+        printf("\033[1;31m无法打开文件 %s 进行写入。\n\033[0m", filename);
         return;
     }
 
@@ -169,9 +191,8 @@ SaveLeafsToFile(const LinkQueue& leafs_queue, const char* filename)
         current = current->last; // 向前移动到上一个节点
     } while(current != leafs_queue.queue_front); // 循环队列
 
-    printf("\033[1;32m[文件保存]: \033[0m");
-    printf("已将 叶子节点信息 保存到 %s\n", filename);
     fclose(file);
+    printf("已将 叶子节点信息 保存到 %s\n", filename);
 }
 
 
@@ -256,7 +277,7 @@ PrintStartupInfo(const State& root_state, const State& target_state)
 
 
 // 从 args.txt 文件中读取启动参数
-bool
+void
 LoadArgsFromFile(const char* filename, State& root_state, State& target_state)
 {
     printf("\033[1;32m[文件读取]: \033[0m");
@@ -264,41 +285,31 @@ LoadArgsFromFile(const char* filename, State& root_state, State& target_state)
     FILE* file = fopen(filename, "r");
     if(!file)
     {
-        printf("无法打开文件 %s 进行读取。\n", filename);
-        return false;
+        printf("\033[1;31m无法打开文件 %s 进行读取，使用默认根状态 123456780\n\033[0m", filename);
+        root_state.StateSet("123456780"); // 设置默认根状态
+        return;
     }
 
     char line[256];
-    if(fgets(line, sizeof(line), file))
-    {
-        root_state.StateSet(line);
-    }
-
-    if(fgets(line, sizeof(line), file))
-    {
-        target_state.StateSet(line);
-    }
+    if(fgets(line, sizeof(line), file)) root_state.StateSet(line);
+    if(fgets(line, sizeof(line), file)) target_state.StateSet(line);
 
     fclose(file);
-
     printf("已从 %s 读取参数\n", filename);
-    return true;
 }
 
 // puzzle.exe < 根状态 > < 目标状态 >
 int
 main(int argc, char* argv[])
 {
-    printf("\033[1;32m3x3 拼图求解器\033[0m\n");
+    printf("\033[1;32m3x3 拼图求解器\033[0m\n\n");
 
 
-    bool need_find_path = false; // 是否需要查找路径
-
-    State     root_state;        // 根状态
-    State     target_state;      // 目标状态
-    LinkQueue path;              // 路径队列
-    LinkQueue leafs;             // 叶子节点队列
-    StateMap  state_map;         // 映射表
+    State     root_state;   // 根状态
+    State     target_state; // 目标状态
+    LinkQueue path;         // 路径队列
+    LinkQueue leafs;        // 叶子节点队列
+    StateMap  state_map;    // 映射表
 
 
     // 处理命令行参数
@@ -313,17 +324,11 @@ main(int argc, char* argv[])
         case 3: // 构建映射表，然后根据 argv[2] 查找路径
             root_state.StateSet(argv[1]);
             target_state.StateSet(argv[2]);
-            need_find_path = true;
 
             break;
 
         default: // 从 args.txt 文件中读取启动参数
-            if(!LoadArgsFromFile("args.txt", root_state, target_state))
-            {
-                printf("从 args.txt 文件中读取参数失败，使用默认根状态 123456780\n");
-                root_state.StateSet("123456780");
-            }
-            else need_find_path = true; // 如果成功读取了目标状态，则需要查找路径
+            LoadArgsFromFile("args.txt", root_state, target_state);
 
             break;
         }
@@ -345,11 +350,16 @@ main(int argc, char* argv[])
         printf("BFS 搜索完成，耗时: %.2f 秒\n", elapsed_time);
 
         // 根据映射表找到 path
-        if(need_find_path)
+        if(target_state.data[0] == 0) printf("目标状态未设置，跳过路径查找。\n");
+        else
         {
             printf("开始查找从根状态到目标状态的路径...\n");
+
             FindPath(state_map, target_state, path); // 从状态映射中找到路径
-            printf("查找完成，路径长度为 %d\n", path.size);
+
+            printf("路径查找结束: ");
+            if(path.size <= 0) printf("不存在从根状态到目标状态的路径。\n");
+            else printf("找到路径，路径长度为 %d\n", path.size);
         }
     }
 
