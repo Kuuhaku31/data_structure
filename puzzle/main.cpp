@@ -234,11 +234,62 @@ PrintStateMapInfo(const StateMap& state_map)
 }
 
 
+// 打印启动状态
+void
+PrintStartupInfo(const State& root_state, const State& target_state)
+{
+    std::string title = "\033[1;34m=========== 启动状态 ===========\033[0m";
+    printf("\n%s\n", title.c_str());
+
+    printf("根状态:\n");
+    print_state(root_state);
+
+    if(target_state.data[0] == 0) printf("目标状态: 未设置\n");
+    else
+    {
+        printf("目标状态:\n");
+        print_state(target_state);
+    }
+
+    printf("%s\n\n", title.c_str());
+}
+
+
+// 从 args.txt 文件中读取启动参数
+bool
+LoadArgsFromFile(const char* filename, State& root_state, State& target_state)
+{
+    printf("\033[1;32m[文件读取]: \033[0m");
+
+    FILE* file = fopen(filename, "r");
+    if(!file)
+    {
+        printf("无法打开文件 %s 进行读取。\n", filename);
+        return false;
+    }
+
+    char line[256];
+    if(fgets(line, sizeof(line), file))
+    {
+        root_state.StateSet(line);
+    }
+
+    if(fgets(line, sizeof(line), file))
+    {
+        target_state.StateSet(line);
+    }
+
+    fclose(file);
+
+    printf("已从 %s 读取参数\n", filename);
+    return true;
+}
+
 // puzzle.exe < 根状态 > < 目标状态 >
 int
 main(int argc, char* argv[])
 {
-    printf("\033[1;32m3x3 拼图求解器\033[0m\n\n");
+    printf("\033[1;32m3x3 拼图求解器\033[0m\n");
 
 
     bool need_find_path = false; // 是否需要查找路径
@@ -254,33 +305,30 @@ main(int argc, char* argv[])
     {
         switch(argc)
         {
-        case 1: // 仅构建映射表，默认 123456780 为根状态
-            root_state.StateSet("123456780");
-
-            printf("未指定目标状态，使用默认根状态 123456780\n");
-
-            break;
-
         case 2: // 仅构建映射表，根据 argv[1] 为根状态
             root_state.StateSet(argv[1]);
 
-            printf("根状态:\n");
-            print_state(root_state);
-
             break;
 
-        default: // 构建映射表，然后根据 argv[2] 查找路径
+        case 3: // 构建映射表，然后根据 argv[2] 查找路径
             root_state.StateSet(argv[1]);
             target_state.StateSet(argv[2]);
             need_find_path = true;
 
-            printf("根状态:\n");
-            print_state(root_state);
-            printf("\n目标状态:\n");
-            print_state(target_state);
+            break;
+
+        default: // 从 args.txt 文件中读取启动参数
+            if(!LoadArgsFromFile("args.txt", root_state, target_state))
+            {
+                printf("从 args.txt 文件中读取参数失败，使用默认根状态 123456780\n");
+                root_state.StateSet("123456780");
+            }
+            else need_find_path = true; // 如果成功读取了目标状态，则需要查找路径
 
             break;
         }
+
+        PrintStartupInfo(root_state, target_state); // 打印启动状态
     }
 
 
@@ -295,6 +343,14 @@ main(int argc, char* argv[])
         clock_t end_time     = clock();                                                     // 记录结束时间
         double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
         printf("BFS 搜索完成，耗时: %.2f 秒\n", elapsed_time);
+
+        // 根据映射表找到 path
+        if(need_find_path)
+        {
+            printf("开始查找从根状态到目标状态的路径...\n");
+            FindPath(state_map, target_state, path); // 从状态映射中找到路径
+            printf("查找完成，路径长度为 %d\n", path.size);
+        }
     }
 
 
@@ -304,16 +360,7 @@ main(int argc, char* argv[])
 
         SaveLeafsToFile(leafs, "leafs.txt");       // 保存叶子节点到文件
         SaveMapToFile(state_map, "state_map.txt"); // 保存状态映射到文件
-    }
-
-
-    // 根据映射表找到 path
-    if(need_find_path)
-    {
-        printf("开始查找从根状态到目标状态的路径...\n");
-        FindPath(state_map, target_state, path); // 从状态映射中找到路径
-        printf("查找完成，路径长度为 %d\n", path.size);
-        SavePathToFile(path, "path.txt");        // 保存路径到文件
+        SavePathToFile(path, "path.txt");          // 保存路径到文件
     }
 
 

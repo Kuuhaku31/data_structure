@@ -6,6 +6,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 11)
 
+# 设置 bin 目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin/")
+
 include_directories("./include")
 
 set(SOURCES
