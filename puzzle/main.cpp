@@ -240,17 +240,16 @@ PrintStateMapInfo(const StateMap& state_map)
 
     std::string title = "\033[1;34m========= 状态映射信息 =========\033[0m";
     printf("\n%s", title.c_str());
-    printf("\033[46m");
-    printf("\n哈希桶总数:             %d", HASH_SIZE);
-    printf("\n空的哈希桶数量:         %d", zero_count);
-    printf("\n哈希桶利用率:           %.2f%%", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
-    printf("\n平均每个哈希桶节点数:   %.2f", average);
-    printf("\n哈希桶节点数方差:       %.2f", variance);
-    printf("\n总共的可能局面数（9!）: %d", 362880); // 9! = 362880
-    printf("\n总节点数:               %d", state_map.node_count);
-    printf("\n叶子节点数:             %d", state_map.leaf_count);
-    printf("\n最大深度:               %d", max_deep);
-    printf("\033[0m\n");
+    printf("\n\033[46;4m哈希桶总数             | %d  |\033[0m", HASH_SIZE);
+    printf("\n\033[46;4m空的哈希桶数量         | %d  |\033[0m", zero_count);
+    printf("\n\033[46;4m哈希桶利用率           | %.2f%% |\033[0m", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
+    printf("\n\033[46;4m平均每个哈希桶节点数   | %.2f   |\033[0m", average);
+    printf("\n\033[46;4m哈希桶节点数方差       | %.2f   |\033[0m", variance);
+    printf("\n\033[46;4m总共的可能局面数（9!） | %d |\033[0m", 362880); // 9! = 362880
+    printf("\n\033[46;4m总节点数               | %d |\033[0m", state_map.node_count);
+    printf("\n\033[46;4m叶子节点数             | %d  |\033[0m", state_map.leaf_count);
+    printf("\n\033[46;4m最大深度               | %d     |\033[0m", max_deep);
+    printf("\n");
     printf("%s\n\n", title.c_str());
 }
 
@@ -298,11 +297,12 @@ LoadArgsFromFile(const char* filename, State& root_state, State& target_state)
     printf("已从 %s 读取参数\n", filename);
 }
 
+
 // puzzle.exe < 根状态 > < 目标状态 >
 int
 main(int argc, char* argv[])
 {
-    printf("\033[1;32m3x3 拼图求解器\033[0m\n\n");
+    printf("\n\033[1;32m3x3 拼图求解器\033[0m\n");
 
 
     State     root_state;   // 根状态
@@ -339,7 +339,7 @@ main(int argc, char* argv[])
 
     // 开始 BFS 搜索，构建映射表
     {
-        printf("开始 BFS 搜索...\n");
+        printf("\033[33mBFS 搜索开始...\033[0m\n");
         clock_t start_time = clock(); // 记录开始时间
 
         // BFS(start_state, target_state, state_map, path);
@@ -347,19 +347,16 @@ main(int argc, char* argv[])
 
         clock_t end_time     = clock();                                                     // 记录结束时间
         double  elapsed_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC; // 计算耗时
-        printf("BFS 搜索完成，耗时: %.2f 秒\n", elapsed_time);
+        printf("\033[33mBFS 搜索完成: \033[0m耗时: %.2f 秒 ", elapsed_time);
 
         // 根据映射表找到 path
         if(target_state.data[0] == 0) printf("目标状态未设置，跳过路径查找。\n");
         else
         {
-            printf("开始查找从根状态到目标状态的路径...\n");
-
             FindPath(state_map, target_state, path); // 从状态映射中找到路径
 
-            printf("路径查找结束: ");
             if(path.size <= 0) printf("不存在从根状态到目标状态的路径。\n");
-            else printf("找到路径，路径长度为 %d\n", path.size);
+            else printf("找到路径，路径长度为 %d\n", path.size - 1);
         }
     }
 

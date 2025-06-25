@@ -249,15 +249,14 @@ StateMap::StateMapInsert(StateNode_ptr& node_ptr, const State& state)
 void
 FindPath(const StateMap& state_map, const State& target_state, LinkQueue& path)
 {
-    StateNode_ptr target_node = state_map.StateMapSearch(target_state); // 查找目标状态节点
-    if(!target_node) return;                                            // 如果目标状态不存在，直接返回
+    StateNode_ptr note_ptr = state_map.StateMapSearch(target_state); // 查找目标状态节点
+    if(!note_ptr) return;                                            // 如果目标状态不存在，直接返回
 
     // 从目标状态向前回溯路径
-    StateNode_ptr path_node = target_node; // 从目标节点开始回溯路径
-    while(path_node != nullptr)
+    while(note_ptr != nullptr)
     {
-        path.LinkQueuePushTail(path_node);                           // 将当前节点加入路径
-        path_node = state_map.StateMapSearch(path_node->last_state); // 回溯到上一个状态
+        path.LinkQueuePushTail(note_ptr);                          // 将当前节点加入路径
+        note_ptr = state_map.StateMapSearch(note_ptr->last_state); // 回溯到上一个状态
     }
 }
 
