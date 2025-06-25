@@ -240,15 +240,15 @@ PrintStateMapInfo(const StateMap& state_map)
 
     std::string title = "\033[1;34m========= 状态映射信息 =========\033[0m";
     printf("\n%s", title.c_str());
-    printf("\n\033[46;4m哈希桶总数             | %d  |\033[0m", HASH_SIZE);
-    printf("\n\033[46;4m空的哈希桶数量         | %d  |\033[0m", zero_count);
-    printf("\n\033[46;4m哈希桶利用率           | %.2f%% |\033[0m", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
-    printf("\n\033[46;4m平均每个哈希桶节点数   | %.2f   |\033[0m", average);
-    printf("\n\033[46;4m哈希桶节点数方差       | %.2f   |\033[0m", variance);
-    printf("\n\033[46;4m总共的可能局面数（9!） | %d |\033[0m", 362880); // 9! = 362880
-    printf("\n\033[46;4m总节点数               | %d |\033[0m", state_map.node_count);
-    printf("\n\033[46;4m叶子节点数             | %d  |\033[0m", state_map.leaf_count);
-    printf("\n\033[46;4m最大深度               | %d     |\033[0m", max_deep);
+    printf("\n\033[46;4m哈希桶总数             | %-10d  |\033[0m", HASH_SIZE);
+    printf("\n\033[46;4m空的哈希桶数量         | %-10d  |\033[0m", zero_count);
+    printf("\n\033[46;4m哈希桶利用率           | %-10.2f%% |\033[0m", (static_cast<double>(HASH_SIZE - zero_count) / HASH_SIZE) * 100.0);
+    printf("\n\033[46;4m平均每个哈希桶节点数   | %-10.2f  |\033[0m", average);
+    printf("\n\033[46;4m哈希桶节点数方差       | %-10.2f  |\033[0m", variance);
+    printf("\n\033[46;4m总共的可能局面数（9!） | %-10d  |\033[0m", 362880); // 9! = 362880
+    printf("\n\033[46;4m总节点数               | %-10d  |\033[0m", state_map.node_count);
+    printf("\n\033[46;4m叶子节点数             | %-10d  |\033[0m", state_map.leaf_count);
+    printf("\n\033[46;4m最大深度               | %-10d  |\033[0m", max_deep);
     printf("\n");
     printf("%s\n\n", title.c_str());
 }
